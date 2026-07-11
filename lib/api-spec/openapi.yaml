@@ -1,0 +1,2092 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: NetVent Parivaar API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: membership
+    description: Membership management
+  - name: members
+    description: Member directory
+  - name: events
+    description: Events
+  - name: groups
+    description: Groups and feed
+  - name: team
+    description: Team members
+  - name: cities
+    description: Cities
+  - name: notifications
+    description: Notifications
+  - name: admin
+    description: Admin operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /v1/auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # MEMBERSHIP
+  /v1/membership/apply:
+    post:
+      operationId: applyMembership
+      tags: [membership]
+      summary: Submit membership application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipApplicationInput"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberProfile"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/membership/status:
+    get:
+      operationId: getMembershipStatus
+      tags: [membership]
+      summary: Get own application status
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MembershipStatusResponse"
+
+  /v1/membership/me:
+    patch:
+      operationId: updateMyProfile
+      tags: [membership]
+      summary: Update own profile and privacy settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberProfile"
+
+  # EXPERTISE LOOKUP
+  /v1/expertise:
+    get:
+      operationId: listExpertise
+      tags: [members]
+      summary: List all available expertise options
+      responses:
+        "200":
+          description: Expertise list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpertiseListResponse"
+
+  # USER PROFILE
+  /v1/users/me:
+    patch:
+      operationId: updateMe
+      tags: [auth]
+      summary: Update own profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: Email or phone already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/users/me/availability:
+    patch:
+      operationId: setAvailability
+      tags: [auth]
+      summary: Update own availability
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvailabilityInput"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  # DIRECTORY
+  /v1/members:
+    get:
+      operationId: listMembers
+      tags: [members]
+      summary: Search and list members
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: expertise
+          in: query
+          schema:
+            type: string
+        - name: available
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Member list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryListResponse"
+
+  /v1/members/{memberId}:
+    get:
+      operationId: getMember
+      tags: [members]
+      summary: Get member profile
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Member profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DirectoryMemberResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # EVENTS
+  /v1/events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List events
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [UPCOMING, PAST]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Events list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventListResponse"
+
+  /v1/events/{eventId}:
+    get:
+      operationId: getEvent
+      tags: [events]
+      summary: Get event detail
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Event detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/events/{eventId}/rsvp:
+    post:
+      operationId: rsvpEvent
+      tags: [events]
+      summary: RSVP to event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: RSVP status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # GROUPS
+  /v1/groups:
+    get:
+      operationId: listGroups
+      tags: [groups]
+      summary: List groups
+      responses:
+        "200":
+          description: Groups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupListResponse"
+
+  /v1/groups/{groupId}:
+    get:
+      operationId: getGroup
+      tags: [groups]
+      summary: Get group detail
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupDetail"
+
+  /v1/groups/{groupId}/posts:
+    post:
+      operationId: createPost
+      tags: [groups]
+      summary: Create a post in a group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
+  /v1/groups/{groupId}/join:
+    post:
+      operationId: joinGroup
+      tags: [groups]
+      summary: Join a group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/posts:
+    get:
+      operationId: listPosts
+      tags: [groups]
+      summary: List posts (optionally filtered by groupId and type)
+      parameters:
+        - name: groupId
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [DISCUSSION, ANNOUNCEMENT, RESOURCE]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+
+  /v1/feed:
+    get:
+      operationId: getFeed
+      tags: [groups]
+      summary: Get global activity feed
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Feed posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+
+  # TEAM
+  /v1/team:
+    get:
+      operationId: listTeam
+      tags: [team]
+      summary: List team members
+      responses:
+        "200":
+          description: Team
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamListResponse"
+
+  # CITIES
+  /v1/cities:
+    get:
+      operationId: listCities
+      tags: [cities]
+      summary: List cities
+      responses:
+        "200":
+          description: Cities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CityListResponse"
+
+  # SKILLS LOOKUP
+  /v1/skills:
+    get:
+      operationId: listSkills
+      tags: [members]
+      summary: List all available skills
+      responses:
+        "200":
+          description: Skills
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillListResponse"
+
+  # NOTIFICATIONS
+  /v1/notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationListResponse"
+
+  /v1/notifications/{notificationId}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # STATS (wow endpoint)
+  /v1/stats:
+    get:
+      operationId: getStats
+      tags: [members]
+      summary: Platform statistics
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformStats"
+
+  # ADMIN
+  /v1/admin/members:
+    get:
+      operationId: adminListMembers
+      tags: [admin]
+      summary: Admin list members with filters
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, APPROVED, REJECTED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminMemberListResponse"
+
+  /v1/admin/members/{profileId}/approve:
+    post:
+      operationId: adminApproveMember
+      tags: [admin]
+      summary: Approve member application
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberProfile"
+
+  /v1/admin/members/{profileId}/reject:
+    post:
+      operationId: adminRejectMember
+      tags: [admin]
+      summary: Reject member application
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectInput"
+      responses:
+        "200":
+          description: Rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberProfile"
+
+  /v1/admin/members/{profileId}:
+    patch:
+      operationId: adminUpdateMember
+      tags: [admin]
+      summary: Admin update member profile
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminMemberUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberProfile"
+    delete:
+      operationId: adminDeleteMember
+      tags: [admin]
+      summary: Delete member
+      parameters:
+        - name: profileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/admin/events:
+    post:
+      operationId: adminCreateEvent
+      tags: [admin]
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+  /v1/admin/events/{eventId}:
+    patch:
+      operationId: adminUpdateEvent
+      tags: [admin]
+      summary: Update event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+    delete:
+      operationId: adminDeleteEvent
+      tags: [admin]
+      summary: Delete event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/admin/groups:
+    post:
+      operationId: adminCreateGroup
+      tags: [admin]
+      summary: Create group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+
+  /v1/admin/groups/{groupId}:
+    patch:
+      operationId: adminUpdateGroup
+      tags: [admin]
+      summary: Update group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GroupUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+    delete:
+      operationId: adminDeleteGroup
+      tags: [admin]
+      summary: Delete group
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/admin/team:
+    post:
+      operationId: adminCreateTeamMember
+      tags: [admin]
+      summary: Add team member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMember"
+
+  /v1/admin/team/{teamMemberId}:
+    patch:
+      operationId: adminUpdateTeamMember
+      tags: [admin]
+      summary: Update team member
+      parameters:
+        - name: teamMemberId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMember"
+    delete:
+      operationId: adminDeleteTeamMember
+      tags: [admin]
+      summary: Delete team member
+      parameters:
+        - name: teamMemberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/admin/cities:
+    post:
+      operationId: adminCreateCity
+      tags: [admin]
+      summary: Create city
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CityInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/City"
+
+  /v1/admin/cities/{cityId}:
+    patch:
+      operationId: adminUpdateCity
+      tags: [admin]
+      summary: Update city
+      parameters:
+        - name: cityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CityUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/City"
+
+  /v1/admin/reports:
+    get:
+      operationId: adminListReports
+      tags: [admin]
+      summary: List reports
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [OPEN, RESOLVED]
+      responses:
+        "200":
+          description: Reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportListResponse"
+
+  /v1/admin/reports/{reportId}/resolve:
+    patch:
+      operationId: adminResolveReport
+      tags: [admin]
+      summary: Resolve report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /v1/admin/dashboard:
+    get:
+      operationId: adminGetDashboard
+      tags: [admin]
+      summary: Admin dashboard stats
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+
+  /v1/reports:
+    post:
+      operationId: createReport
+      tags: [members]
+      summary: Report a post or profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "201":
+          description: Reported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required: [code, message]
+      required: [success, error]
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required: [success]
+
+    # AUTH SCHEMAS
+    SignupInput:
+      type: object
+      required: [name, email, password, phone, city, educationType, expertiseIds]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        phone:
+          type: string
+          pattern: "^[0-9]{10}$"
+        city:
+          type: string
+        educationType:
+          type: string
+          enum: [SCHOOL, COLLEGE]
+        schoolOrCollegeName:
+          type: ["string", "null"]
+        schoolClass:
+          type: ["string", "null"]
+        degreeLevel:
+          type: ["string", "null"]
+          enum: [DIPLOMA, BACHELORS, MASTERS, null]
+        collegeYear:
+          type: ["string", "null"]
+        expertiseIds:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+
+    UserMe:
+      type: object
+      required: [id, name, email, role, isAvailable]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [BASIC, MEMBER, MODERATOR, ADMIN]
+        phone:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        educationType:
+          type: ["string", "null"]
+          enum: [SCHOOL, COLLEGE, null]
+        schoolOrCollegeName:
+          type: ["string", "null"]
+        schoolClass:
+          type: ["string", "null"]
+        degreeLevel:
+          type: ["string", "null"]
+          enum: [DIPLOMA, BACHELORS, MASTERS, null]
+        collegeYear:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        isAvailable:
+          type: boolean
+        expertise:
+          type: array
+          items:
+            $ref: "#/components/schemas/Expertise"
+        memberProfile:
+          $ref: "#/components/schemas/MemberProfile"
+
+    AuthResponse:
+      type: object
+      required: [success, user]
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: "#/components/schemas/UserMe"
+
+    Expertise:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    ExpertiseListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Expertise"
+
+    UpdateProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          pattern: "^[0-9]{10}$"
+        city:
+          type: string
+        educationType:
+          type: string
+          enum: [SCHOOL, COLLEGE]
+        schoolOrCollegeName:
+          type: ["string", "null"]
+        schoolClass:
+          type: ["string", "null"]
+        degreeLevel:
+          type: ["string", "null"]
+          enum: [DIPLOMA, BACHELORS, MASTERS, null]
+        collegeYear:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        avatarUrl:
+          type: ["string", "null"]
+        password:
+          type: string
+          minLength: 8
+        expertiseIds:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+
+    AvailabilityInput:
+      type: object
+      required: [isAvailable]
+      properties:
+        isAvailable:
+          type: boolean
+
+    DirectoryMember:
+      type: object
+      required: [id, name, isAvailable, expertise]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        educationType:
+          type: ["string", "null"]
+          enum: [SCHOOL, COLLEGE, null]
+        schoolOrCollegeName:
+          type: ["string", "null"]
+        schoolClass:
+          type: ["string", "null"]
+        degreeLevel:
+          type: ["string", "null"]
+          enum: [DIPLOMA, BACHELORS, MASTERS, null]
+        collegeYear:
+          type: ["string", "null"]
+        isAvailable:
+          type: boolean
+        expertise:
+          type: array
+          items:
+            $ref: "#/components/schemas/Expertise"
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+
+    DirectoryListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/DirectoryMember"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    DirectoryMemberResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/DirectoryMember"
+
+    # MEMBER SCHEMAS
+    MembershipApplicationInput:
+      type: object
+      required: [fullName, age, cityId, stateId, institution, classYear]
+      properties:
+        fullName:
+          type: string
+        profilePhotoUrl:
+          type: ["string", "null"]
+        age:
+          type: integer
+          minimum: 13
+          maximum: 35
+        cityId:
+          type: string
+        stateId:
+          type: string
+        institution:
+          type: string
+        classYear:
+          type: string
+        phone:
+          type: ["string", "null"]
+        whatsapp:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        instagramUrl:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+        skillIds:
+          type: array
+          items:
+            type: string
+        privacySettings:
+          $ref: "#/components/schemas/PrivacySettings"
+
+    ProfileUpdate:
+      type: object
+      properties:
+        fullName:
+          type: string
+        profilePhotoUrl:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        whatsapp:
+          type: ["string", "null"]
+        instagramUrl:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+        institution:
+          type: string
+        classYear:
+          type: string
+        skillIds:
+          type: array
+          items:
+            type: string
+        privacySettings:
+          $ref: "#/components/schemas/PrivacySettings"
+
+    PrivacySettings:
+      type: object
+      properties:
+        phone:
+          type: string
+          enum: [public, private]
+        whatsapp:
+          type: string
+          enum: [public, private]
+        email:
+          type: string
+          enum: [public, private]
+
+    MemberProfile:
+      type: object
+      required: [id, userId, status]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        memberId:
+          type: ["string", "null"]
+        fullName:
+          type: string
+        profilePhotoUrl:
+          type: ["string", "null"]
+        age:
+          type: ["integer", "null"]
+        cityId:
+          type: ["string", "null"]
+        stateId:
+          type: ["string", "null"]
+        institution:
+          type: ["string", "null"]
+        classYear:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        whatsapp:
+          type: ["string", "null"]
+        bio:
+          type: ["string", "null"]
+        instagramUrl:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        rejectionReason:
+          type: ["string", "null"]
+        approvedAt:
+          type: ["string", "null"]
+        privacySettings:
+          $ref: "#/components/schemas/PrivacySettings"
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+        city:
+          $ref: "#/components/schemas/City"
+        state:
+          $ref: "#/components/schemas/State"
+        createdAt:
+          type: string
+
+    MembershipStatusResponse:
+      type: object
+      properties:
+        hasApplied:
+          type: boolean
+        profile:
+          $ref: "#/components/schemas/MemberProfile"
+
+    MemberCardItem:
+      type: object
+      required: [id, memberId, fullName]
+      properties:
+        id:
+          type: string
+        memberId:
+          type: string
+        fullName:
+          type: string
+        profilePhotoUrl:
+          type: ["string", "null"]
+        city:
+          $ref: "#/components/schemas/City"
+        state:
+          $ref: "#/components/schemas/State"
+        institution:
+          type: ["string", "null"]
+        classYear:
+          type: ["string", "null"]
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+
+    MemberProfilePublic:
+      type: object
+      required: [id, memberId, fullName]
+      properties:
+        id:
+          type: string
+        memberId:
+          type: string
+        fullName:
+          type: string
+        profilePhotoUrl:
+          type: ["string", "null"]
+        age:
+          type: ["integer", "null"]
+        bio:
+          type: ["string", "null"]
+        institution:
+          type: ["string", "null"]
+        classYear:
+          type: ["string", "null"]
+        instagramUrl:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+        whatsappLink:
+          type: ["string", "null"]
+        city:
+          $ref: "#/components/schemas/City"
+        state:
+          $ref: "#/components/schemas/State"
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+
+    MemberListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberCardItem"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    AdminMemberListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberProfile"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    AdminMemberUpdate:
+      type: object
+      properties:
+        fullName:
+          type: string
+        role:
+          type: string
+          enum: [BASIC, MEMBER, MODERATOR, ADMIN]
+        status:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+
+    RejectInput:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+
+    # EVENT SCHEMAS
+    Event:
+      type: object
+      required: [id, title, eventDate, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        venue:
+          type: ["string", "null"]
+        eventDate:
+          type: string
+        status:
+          type: string
+          enum: [UPCOMING, PAST]
+        coverImageUrl:
+          type: ["string", "null"]
+        rsvpCount:
+          type: integer
+        hasRsvped:
+          type: boolean
+        createdAt:
+          type: string
+
+    EventDetail:
+      type: object
+      required: [id, title, eventDate, status]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        venue:
+          type: ["string", "null"]
+        eventDate:
+          type: string
+        status:
+          type: string
+          enum: [UPCOMING, PAST]
+        coverImageUrl:
+          type: ["string", "null"]
+        rsvpCount:
+          type: integer
+        hasRsvped:
+          type: boolean
+        photos:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              photoUrl:
+                type: string
+            required: [id, photoUrl]
+        sponsors:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              logoUrl:
+                type: ["string", "null"]
+            required: [id, name]
+        createdAt:
+          type: string
+
+    EventInput:
+      type: object
+      required: [title, eventDate, status]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        venue:
+          type: string
+        eventDate:
+          type: string
+        status:
+          type: string
+          enum: [UPCOMING, PAST]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    EventUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        venue:
+          type: string
+        eventDate:
+          type: string
+        status:
+          type: string
+          enum: [UPCOMING, PAST]
+        coverImageUrl:
+          type: ["string", "null"]
+
+    EventListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    # GROUP SCHEMAS
+    Group:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        memberCount:
+          type: integer
+        postCount:
+          type: integer
+        isMember:
+          type: boolean
+        createdAt:
+          type: string
+
+    GroupDetail:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        memberCount:
+          type: integer
+        isMember:
+          type: boolean
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    GroupListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Group"
+
+    GroupInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        moderatorId:
+          type: ["string", "null"]
+
+    GroupUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        moderatorId:
+          type: ["string", "null"]
+
+    Post:
+      type: object
+      required: [id, type, content, createdAt]
+      properties:
+        id:
+          type: string
+        groupId:
+          type: ["string", "null"]
+        groupName:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [DISCUSSION, ANNOUNCEMENT, RESOURCE]
+        content:
+          type: string
+        resourceUrl:
+          type: ["string", "null"]
+        author:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            profilePhotoUrl:
+              type: ["string", "null"]
+            memberId:
+              type: ["string", "null"]
+          required: [id, name]
+        createdAt:
+          type: string
+
+    PostInput:
+      type: object
+      required: [type, content]
+      properties:
+        type:
+          type: string
+          enum: [DISCUSSION, ANNOUNCEMENT, RESOURCE]
+        content:
+          type: string
+        resourceUrl:
+          type: ["string", "null"]
+
+    FeedResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    # TEAM SCHEMAS
+    TeamMember:
+      type: object
+      required: [id, name, roleTitle, section, displayOrder]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        roleTitle:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        section:
+          type: string
+          enum: [FOUNDER, CORE, ADVISOR]
+        displayOrder:
+          type: integer
+        socialLinks:
+          type: object
+          properties:
+            instagram:
+              type: ["string", "null"]
+            linkedin:
+              type: ["string", "null"]
+            twitter:
+              type: ["string", "null"]
+
+    TeamMemberInput:
+      type: object
+      required: [name, roleTitle, section, displayOrder]
+      properties:
+        name:
+          type: string
+        roleTitle:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        section:
+          type: string
+          enum: [FOUNDER, CORE, ADVISOR]
+        displayOrder:
+          type: integer
+        socialLinks:
+          type: object
+          properties:
+            instagram:
+              type: ["string", "null"]
+            linkedin:
+              type: ["string", "null"]
+            twitter:
+              type: ["string", "null"]
+
+    TeamMemberUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        roleTitle:
+          type: string
+        photoUrl:
+          type: ["string", "null"]
+        section:
+          type: string
+          enum: [FOUNDER, CORE, ADVISOR]
+        displayOrder:
+          type: integer
+        socialLinks:
+          type: object
+          properties:
+            instagram:
+              type: ["string", "null"]
+            linkedin:
+              type: ["string", "null"]
+            twitter:
+              type: ["string", "null"]
+
+    TeamListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamMember"
+
+    # CITY / STATE
+    City:
+      type: object
+      required: [id, name, status]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, UPCOMING]
+        stateId:
+          type: string
+        state:
+          $ref: "#/components/schemas/State"
+        memberCount:
+          type: integer
+
+    State:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    CityListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/City"
+
+    CityInput:
+      type: object
+      required: [name, stateId, status]
+      properties:
+        name:
+          type: string
+        stateId:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, UPCOMING]
+
+    CityUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, UPCOMING]
+        cityLeadId:
+          type: ["string", "null"]
+
+    # SKILLS
+    Skill:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    SkillListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+
+    # NOTIFICATIONS
+    Notification:
+      type: object
+      required: [id, type, read, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        payload:
+          type: object
+        read:
+          type: boolean
+        createdAt:
+          type: string
+
+    NotificationListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Notification"
+        unreadCount:
+          type: integer
+
+    # REPORTS
+    Report:
+      type: object
+      required: [id, targetType, reason, status]
+      properties:
+        id:
+          type: string
+        reporterId:
+          type: string
+        targetType:
+          type: string
+          enum: [POST, PROFILE]
+        targetId:
+          type: string
+        reason:
+          type: string
+        status:
+          type: string
+          enum: [OPEN, RESOLVED]
+        createdAt:
+          type: string
+
+    ReportInput:
+      type: object
+      required: [targetType, targetId, reason]
+      properties:
+        targetType:
+          type: string
+          enum: [POST, PROFILE]
+        targetId:
+          type: string
+        reason:
+          type: string
+
+    ReportListResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Report"
+
+    # STATS
+    PlatformStats:
+      type: object
+      required: [totalMembers, totalEvents, totalGroups, activeCities]
+      properties:
+        totalMembers:
+          type: integer
+        totalEvents:
+          type: integer
+        totalGroups:
+          type: integer
+        activeCities:
+          type: integer
+        pendingApplications:
+          type: integer
+        recentMembers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberCardItem"
+
+    AdminDashboard:
+      type: object
+      required: [totalMembers, pendingApplications, totalEvents, totalGroups]
+      properties:
+        totalMembers:
+          type: integer
+        pendingApplications:
+          type: integer
+        totalEvents:
+          type: integer
+        totalGroups:
+          type: integer
+        openReports:
+          type: integer
+        recentApplications:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberProfile"
+        membersByCity:
+          type: array
+          items:
+            type: object
+            properties:
+              city:
+                type: string
+              count:
+                type: integer
+            required: [city, count]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+      required: [page, limit, total, totalPages]

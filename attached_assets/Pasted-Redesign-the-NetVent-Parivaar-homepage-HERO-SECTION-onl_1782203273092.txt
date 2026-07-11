@@ -1,0 +1,63 @@
+Redesign the NetVent Parivaar homepage HERO SECTION only. Keep all existing 
+functionality, routes, and other sections unchanged.
+
+PHOTOS (provided by me):
+- I am uploading 3 of our own community/event photos in this chat. Use these 3 
+  images as the rotating hero background carousel (slide 1, 2, 3 in the order 
+  uploaded).
+- Place them in an easy-to-edit config array at the top of the hero component 
+  (e.g. const HERO_IMAGES = [img1, img2, img3]) so I can swap them later.
+- Import/reference the uploaded image files directly — do NOT use placeholder 
+  or stock images.
+
+COLOR SCHEME (apply across the whole page, not just hero):
+- The overall page background must NOT be plain white — use a soft LIGHT BLUE 
+  tint as the base (e.g. a very pale blue/teal wash like #EAF4F4 / #E8F1F2, 
+  with subtle gradient toward white in places). Every section sits on this 
+  light-blue shade.
+- Primary accent / brand color: TEAL (#3FA796 / #4DB6A4) — used for the script 
+  highlight word, the badge pill, links, and the primary button.
+- Headings: deep NAVY/near-black (#0E1B2A) for strong contrast.
+- Secondary CTA accent: CORAL/PINK (#F2807E / #EF7C7A) for the top-right 
+  "Join Next Event" nav button.
+- Buttons rounded (pill shaped). Keep contrast high and readable on light blue.
+
+LAYOUT (full-bleed background carousel):
+- Hero is full-width, near-full-viewport-height (min-height: 90vh), sitting on 
+  the light-blue page background.
+- BACKGROUND is the rotating carousel of my 3 uploaded photos, faded/light:
+    • Apply a semi-transparent LIGHT BLUE overlay over each image so text stays 
+      readable — e.g. linear-gradient(rgba(234,244,244,0.6), 
+      rgba(234,244,244,0.6)) over the image. Optional subtle blur.
+    • Images cover the full section (object-fit: cover, center).
+
+CAROUSEL:
+- 3 background photos auto-rotate every 5 seconds and loop.
+- Left arrow (‹) far-left center, right arrow (›) far-right center — circular, 
+  semi-transparent white buttons, clickable for prev/next.
+- Dot/line indicators at the BOTTOM LEFT showing current slide; active indicator 
+  highlighted in TEAL.
+- Smooth fade or slide transition between images.
+
+HERO CONTENT (overlaid, centered):
+- Small rounded pill badge at top: "● Bharat ka apna Parivaar" — teal dot, teal 
+  text, translucent white pill.
+- Main headline (large, bold, friendly font): "The Digital Home for India's" in 
+  deep navy, then "Driven Youth" in teal on the next line.
+- Subheading in muted gray-blue: "Connect, collaborate, and grow with a vibrant 
+  community of students across India. Not just another network—a family."
+- Two CTA buttons centered below:
+    • Primary: "Join NetVent Today" (solid teal, white text, rounded pill).
+    • Secondary: "Learn More" (translucent/white background, thin border, dark 
+      text, rounded pill).
+
+RESPONSIVE:
+- Mobile-first. On small screens: headline scales down, buttons stack vertically 
+  full-width, arrows shrink, content stays centered and readable.
+
+TECH:
+- Build as a self-contained React/Next.js client component in TypeScript using 
+  Tailwind CSS, consistent with the existing codebase. Use React state 
+  (useState/useEffect) for the carousel — no external carousel library.
+- Do NOT use localStorage. Keep all other homepage sections intact, but update 
+  their background to the light-blue base color for consistency.

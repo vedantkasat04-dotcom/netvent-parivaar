@@ -1,0 +1,277 @@
+You are rebuilding the NetVent Parivaar homepage and overall site structure 
+from scratch. This must look like a REAL, launch-ready, human-designed website 
+— not AI-generated. Use micro and nano animations throughout. Every section 
+must feel intentional, warm, and youth-focused. Use TypeScript + Next.js + 
+Tailwind CSS. Keep all existing backend/auth/database intact — this is a 
+frontend restructure only.
+
+=============================================================
+SECTION 1 — GLOBAL DESIGN SYSTEM
+=============================================================
+
+COLOR PALETTE (apply everywhere, no orange anywhere):
+- Page background: soft light blue/mint wash #EAF4F4 — never plain white
+- Primary accent: Teal #3FA796
+- Headings: Deep navy #0E1B2A
+- Body text: Slate gray-blue #4A5568
+- Dark section backgrounds: #0E1B2A (navy) or #1a2f3a
+- Buttons: Teal pill (primary), white bordered pill (secondary)
+- All buttons: rounded-full, smooth hover scale + color transitions
+
+TYPOGRAPHY:
+- Display headings: serif or rounded bold (e.g. Playfair Display or similar)
+- Body: clean sans-serif (Inter or similar)
+- Italic teal accent words on key phrases (like "Parivaar.", "in-between.")
+- "Bharat ka apna Parivaar" badge: bold, slightly larger than before
+
+ANIMATIONS (add these throughout — subtle, not flashy):
+- Fade-up on scroll for every section (IntersectionObserver or Framer Motion)
+- Counter animation on stats (count up from 0 when scrolled into view)
+- Smooth underline hover on nav links
+- Subtle scale on card hover (scale-105, shadow lift)
+- Smooth carousel transitions (fade or slide)
+- Nav: smooth backdrop blur on scroll
+- Buttons: scale + shadow on hover
+- Founder cards: gentle lift on hover
+- Badge pill: soft pulse dot animation (the teal dot)
+
+=============================================================
+SECTION 2 — NAVBAR (5 items, flat — no dropdowns)
+=============================================================
+
+Structure: Logo left, 5 nav items right.
+
+Logo: "NetVent Parivaar" text in teal, bold. Small teal icon/mark beside it.
+
+Nav items (exact order):
+1. Home
+2. Gallery
+3. Events
+4. Our Parivaar  ← this is a standalone PAGE (no dropdown), shows the member 
+                    directory where members can see and search each other.
+                    NO team/advisors section here.
+5. Discussion Forum
+
+Right side of nav: "Join NetVent" button — teal pill, white text.
+
+On scroll: navbar gets white/frosted glass background with soft shadow.
+Mobile: hamburger menu, full-screen or slide-in drawer with all 5 items.
+
+Remove entirely: Directory, Team, My Dashboard from nav.
+Keep all their underlying routes working — just not in the main nav.
+
+=============================================================
+SECTION 3 — HERO (inspired by GIVA layout)
+=============================================================
+
+Layout inspiration: Like GIVA's hero — a FULL-WIDTH, HIGH-QUALITY photo 
+banner across the top. NO transparency, NO overlay fading the image. The 
+photo should look crisp, vivid, full-HD quality. This is a photo-first hero.
+
+Structure:
+- Full-width image banner, ~70-80vh tall on desktop, full width, 
+  object-fit: cover, object-position: center top (so faces aren't cut).
+- The image is ONE of our community/event photos (use /hero/hero1.jpg as 
+  placeholder — I will replace with real photo).
+- On top of the image (bottom-left or center-bottom overlay area), place a 
+  semi-transparent dark navy pill or bar with minimal text — OR position 
+  the text BELOW the image (not over it), like GIVA does.
+
+Below the image, on the light-blue background:
+- Badge pill: "● Bharat ka apna Parivaar" — bold, slightly larger font, 
+  teal dot, teal text, white rounded pill. The dot should have a soft 
+  CSS pulse animation.
+- Main headline (large, bold, serif): use THIS exact copy:
+  "Where Gujarat's Youth Come to Connect, Lead, and Belong."
+  (first line dark navy, no teal split needed — clean single-color headline)
+- Subheading (muted slate): 
+  "NetVent Parivaar is Gujarat's most active youth community — built on 
+  real events, real friendships, and a family that stays with you long 
+  after the event ends."
+- Two CTA buttons: 
+  Primary: "Join the Parivaar →" (solid teal, white text, rounded pill)
+  Secondary: "Explore Events" (white bg, teal border, teal text, rounded pill)
+- Smooth fade-up animation on badge → headline → subtext → buttons 
+  (staggered, 150ms delay each).
+
+=============================================================
+SECTION 4 — IMPACT STATS BANNER
+=============================================================
+
+Full-width dark navy/teal gradient banner (like RYN's "Our Impact" section).
+4 stats in a row with icons above each number.
+Counter animation: counts up from 0 when scrolled into view (use 
+IntersectionObserver + requestAnimationFrame).
+
+Stats (use EXACTLY these — correct spelling and capitals):
+- 600+   Youth Connected       (icon: people/group)
+- 3      Cities Covered        (icon: location pin)
+- 75+    Parivaar Members      (icon: heart/community)
+- 4+     Events Organised      (icon: calendar)
+
+Section heading above stats: "Our Impact So Far"
+Small subtext: "Real numbers. Real connections. Real Parivaar."
+
+=============================================================
+SECTION 5 — WHAT IS NETVENT (rewritten, polished copy)
+=============================================================
+
+Layout: centered, generous white-space, light-blue background section.
+Heading: "What is NetVent?" — serif, navy. The word "NetVent" in italic teal.
+
+Use this EXACT polished copy:
+
+Subheading (bold, with teal italic tail):
+"NetVent is more than events. It's a feeling."
+
+Body paragraphs:
+"NetVent Parivaar didn't begin as an organisation — it began as a belief: 
+that the best moments of any event never happen on stage. They happen in 
+the in-between.
+
+In the late-night conversations that feel more real than any formal session. 
+In the laughter after it all ends, when no one is ready to leave. In 
+friendships formed with people who, just hours earlier, were complete 
+strangers.
+
+That's where NetVent lives."
+
+Italic teal line: "That's where NetVent lives."
+
+Continuation:
+"We design and host experiences — from high-energy Model UN conferences to 
+community nights and networking events. But what we're really building 
+isn't just events. We're building a space where young people feel seen, 
+connected, and alive.
+
+Every experience is intentional — not just in how it runs, but in how it 
+feels."
+
+Rounded card (light border, soft shadow) titled "WE THINK ABOUT:" with 
+three teal arrow points:
+   → Who you will meet
+   → What you will feel
+   → What you will remember months later
+
+Closing paragraphs:
+"Because the real success of an event is not measured in attendance — it 
+is measured in the stories people carry forward.
+
+At NetVent Parivaar, you do not just attend. You become part of something — 
+a community that grows with you, a network that stays with you, a feeling 
+that keeps bringing you back."
+
+Final italic teal closing line, larger font:
+"It becomes your Parivaar."
+
+Fade-up animation on each paragraph as user scrolls.
+
+=============================================================
+SECTION 6 — FROM THE FOUNDERS' DESK
+=============================================================
+
+IMPORTANT: This must look ORIGINAL and different from RYN. Do NOT copy 
+their card layout. Design it differently.
+
+Layout: full-width section, dark navy background (#0E1B2A).
+Section heading (white, serif, centered): "From the Founders' Desk"
+Subheading (muted teal, centered, smaller):
+"The people behind the Parivaar — and why they built it."
+
+Two founder blocks side by side (or stacked on mobile):
+Each block:
+- Large photo (portrait style, rounded-xl corners, not circular)
+- Name below in white, bold
+- Title below in teal, smaller
+- 1–2 line quote in italic white/light gray below that
+- A thin teal left-border accent on the quote (blockquote style)
+
+Founder 1:
+  Name: Parth Kasat
+  Title: Founder
+  Quote (placeholder): "NetVent started with one simple question — what if 
+  we stopped waiting for opportunities and started creating them ourselves?"
+
+Founder 2:
+  Name: Vedant Kasat
+  Title: Co-Founder
+  Quote (placeholder): "Every event we've built has taught us the same 
+  thing — people are hungry to connect. We just gave them a reason to 
+  show up."
+
+Photo placeholders: /founders/parth.jpg and /founders/vedant.jpg
+(I will replace with real photos.)
+
+Hover animation: subtle lift + soft teal glow on each founder card.
+Fade-up animation on scroll.
+
+=============================================================
+SECTION 7 — JOIN THE PARIVAAR (CTA BANNER)
+=============================================================
+
+Full-width rounded-2xl teal gradient banner (teal to navy).
+Centered text:
+  Heading (white, bold, serif): "Ready to Find Your People?"
+  Subtext (white/translucent): 
+  "Join a community of driven young people from across Gujarat and beyond. 
+  Your Parivaar is waiting."
+Two buttons:
+  Primary: "Join NetVent →" (white bg, teal text)
+  Secondary: "Learn More" (transparent, white border, white text)
+
+Smooth hover states on both buttons.
+
+=============================================================
+SECTION 8 — FOOTER
+=============================================================
+
+Three-column footer, dark navy background (#0A1628):
+
+Left column:
+  - "NetVent Parivaar" in teal, bold
+  - Tagline: "Bharat ka apna Parivaar"
+  - Contact email (mailto link): hello@netventparivaar.com
+
+Middle column — Quick Links:
+  Home, Gallery, Events, Our Parivaar, Discussion Forum, Join NetVent
+
+Right column — Follow Us on Instagram:
+  Four Instagram handles, each a clickable link opening in new tab.
+  Display with a small Instagram icon beside each name.
+  Teal hover color.
+  - @netvent_parivaar   → https://instagram.com/netvent_parivaar
+  - @netvent_vadodara   → https://instagram.com/netvent_vadodara
+  - @netvent_ahmedabad  → https://instagram.com/netvent_ahmedabad
+  - @netvent_pune       → https://instagram.com/netvent_pune
+
+Bottom bar (below all columns):
+  "© 2026 NetVent Parivaar. All rights reserved." — muted, centered.
+
+=============================================================
+SECTION 9 — OUR PARIVAAR PAGE (standalone route /parivaar)
+=============================================================
+
+This is the member directory page. Full member search and filter.
+Keep all existing backend logic for member approval, profiles, NVP IDs.
+UI: light-blue background, search bar at top, filter by City and Skills.
+Member cards: photo, name, city, skills as teal badge pills.
+Click card → opens full profile.
+NO team members or advisors shown here — only approved community members.
+
+=============================================================
+SECTION 10 — FINAL INSTRUCTIONS
+=============================================================
+
+- TypeScript + Next.js App Router + Tailwind CSS.
+- Mobile-first. Test all breakpoints. Hamburger nav on mobile.
+- All image paths use a config array at top of each component for easy swap.
+- Use Framer Motion OR CSS IntersectionObserver for all scroll animations.
+- Counter animation on stats section (count up on scroll into view).
+- Do NOT use localStorage anywhere.
+- Do NOT break any existing backend routes, APIs, or database logic.
+- Do NOT make it look AI-generated — vary spacing, font sizes, and layout 
+  rhythm so it feels hand-crafted.
+- Spell check everything: "Parivaar" (not Parivaar), "Organised" (not 
+  Organized), "Vedant Kasat", "Parth Kasat", "NetVent" (capital N capital V).
+- Every section should have enough breathing room (padding) to feel premium.
+- No placeholder grey boxes — use real layout with placeholder image paths.

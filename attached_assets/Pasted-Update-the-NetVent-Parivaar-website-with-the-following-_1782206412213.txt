@@ -1,0 +1,114 @@
+Update the NetVent Parivaar website with the following changes. Apply a 
+consistent design across ALL pages. This should look like a polished, 
+ready-to-launch website.
+
+=========================
+1. GLOBAL COLOR SCHEME (replace orange entirely)
+=========================
+- DROP the orange completely — including the logo mark and all nav accents. 
+  No orange anywhere on the site.
+- New palette:
+    • Page background: soft LIGHT BLUE / pale mint wash (e.g. #EAF4F4 / #E8F1F2) 
+      — never plain white. Every section sits on this light tint.
+    • Primary accent: TEAL (#3FA796 / #4DB6A4) — logo, links, primary buttons, 
+      italic highlight words, badge dots.
+    • Headings: deep NAVY/near-black (#0E1B2A).
+    • Body text: muted slate/gray-blue.
+- Buttons are rounded (pill shaped), teal primary, with a white/translucent 
+  bordered secondary style.
+- Update the logo text "NetVent Parivaar" and the "N" mark to teal.
+
+=========================
+2. NAVBAR (only 3 items)
+=========================
+Replace the current navbar items with exactly THREE top-level items:
+- "Home"  → single page that COMBINES the old Home + Events content/sections.
+- "Parivaar" → dropdown menu with TWO sections:
+      • "Our Team"     → the internal NetVent team members.
+      • "Our Parivaar" → the community members we onboard; NetVent acts as a 
+                         mediator/connector between them (this is the public 
+                         member directory).
+- "Discussion Groups" → where members chat within their skill/interest groups.
+
+REMOVE entirely: the separate "Events", "Directory", "Team", and "My Dashboard" 
+nav items. (Events folds into Home; Directory becomes "Our Parivaar"; Team 
+becomes "Our Team"; both live under the Parivaar dropdown.)
+Keep all underlying routes/functionality working — only the nav structure and 
+grouping changes.
+
+=========================
+3. "WHAT IS NETVENT" SECTION (on Home) — use this exact polished copy
+=========================
+Style it elegantly: centered heading with the word "NetVent" in italic teal, 
+generous spacing, serif display headings + clean sans body, a soft rounded 
+light-card for the "We think about" block. Use this copy:
+
+Heading:  What is NetVent?
+
+Subhead (bold, with teal italic tail):  
+"NetVent is more than events. It's a feeling."
+
+Body:
+"NetVent didn't begin as an organisation — it began as a belief: that the best 
+moments of any event never happen on stage. They happen in the in-between.
+
+In the late-night WhatsApp conversations that feel more real than any session. 
+In the laughter after it all ends, when no one's ready to leave. In friendships 
+formed with people who, only hours earlier, were complete strangers.
+
+That's where NetVent lives."
+
+Italic line (teal): "That's where NetVent lives."
+
+Continue:
+"We design and host experiences — from high-energy Model UN conferences to 
+competitive leagues and unforgettable social nights. But what we're really 
+building isn't events. We're building a space where people feel seen, connected, 
+and alive. Every experience we create is intentional — not just in how it runs, 
+but in how it feels."
+
+Card titled "WE THINK ABOUT:" with three teal-arrow points:
+   → Who you'll meet
+   → What you'll feel
+   → What you'll remember months later
+
+Closing:
+"Because the real success of an event isn't measured in attendance — it's 
+measured in the stories people carry forward.
+
+At NetVent Parivaar, you don't just attend. You become part of something — a 
+community that grows with you, a network that stays with you, a feeling that 
+keeps bringing you back. That's why people don't come once. They return. They 
+reconnect. They belong.
+
+And somewhere between your first event and your next, NetVent stops being just 
+a platform."
+
+Final italic teal line, larger:  "It becomes your Parivaar."
+
+=========================
+4. FOOTER (add Instagram + email)
+=========================
+At the bottom of every page, add a footer in the teal/light-blue theme with:
+- Four Instagram handles, each a clickable link opening the profile in a new tab:
+    • netvent_parivaar   → https://instagram.com/netvent_parivaar
+    • netvent_vadodara   → https://instagram.com/netvent_vadodara
+    • netvent_ahmedabad  → https://instagram.com/netvent_ahmedabad
+    • netvent_pune       → https://instagram.com/netvent_pune
+  Display them by handle name; clicking the name opens that Instagram page.
+- One contact email (placeholder for now): hello@netventparivaar.com 
+  (make it a mailto link).
+- Keep it clean and presentable — small Instagram icon next to each handle, 
+  navy text, teal hover.
+
+=========================
+5. POLISH / LAUNCH-READY
+=========================
+- Mobile-first responsive across all pages; nav collapses to a clean hamburger 
+  menu on mobile with the Parivaar dropdown working as an expandable section.
+- Consistent spacing, rounded cards, soft shadows, smooth hover states.
+- Smooth, professional typography (serif display for headings, clean sans for 
+  body).
+- TypeScript + Tailwind, consistent with the existing codebase. Do NOT use 
+  localStorage. Keep all existing data/backend functionality intact — this is 
+  a restructure + restyle, not a rebuild.

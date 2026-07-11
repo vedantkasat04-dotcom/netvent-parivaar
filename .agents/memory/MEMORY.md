@@ -1,0 +1,5 @@
+- [Admin router mounting](admin-router-mounting.md) — admin router must be mounted at a path prefix; blanket router.use(middleware) without path intercepts ALL routes.
+- [Express params typing](express-params-typing.md) — req.params.* is string | string[] in Express TS; always wrap with String() before Drizzle eq() calls.
+- [Orval TS2308 collision](orval-collision.md) — endpoints with both path params AND query params generate conflicting *Params type names; fix by splitting to query-param-only path.
+- [NVP member ID format](nvp-member-id.md) — member IDs are NVP0001 format, assigned sequentially on admin approval from memberProfilesTable.memberId column.
+- [Auth response envelope](auth-response-envelope.md) — getMe/login/signup all return { success, user }; OpenAPI response schema must match the server envelope or the client reads the wrong shape.

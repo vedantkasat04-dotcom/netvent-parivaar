@@ -1,0 +1,93 @@
+# NetVent Parivaar — Build Prompt: Auth, Profiles, Dashboard & Directory
+
+You are extending an existing Next.js 14 (App Router) + TypeScript + Prisma + PostgreSQL + Tailwind application called **NetVent Parivaar**. The homepage, navbar, hero, impact stats, and base layout already exist. Do NOT rebuild them. Add the features below on top of the existing codebase. Keep the existing teal + light-blue + dark-navy design system, fonts, and component style.
+
+Build clean, modular, typed, production-ready code. Use the existing auth/session layer if one exists; only add what's missing. Validate all input with Zod on both client and server. Do not put business logic in route handlers — use a service layer.
+
+---
+
+## 1. DISCUSSION FORUM → COMING SOON
+
+- Keep "Discussion Forum" in the navbar.
+- The page renders a centered "Coming Soon" state: large heading, one supporting line, and the NetVent logo mark. Match the existing teal/navy theme. No forum functionality yet.
+
+---
+
+## 2. CONDITIONAL NAVBAR
+
+- **Logged out:** the right side shows a **Login** button (and Login routes to the login page, which links to Sign Up). Do NOT show "Dashboard" or an avatar when logged out.
+- **Logged in:** the right side shows **Dashboard** + a circular avatar (initials if no photo).
+- Determine auth state from the session.
+
+---
+
+## 3. AUTHENTICATION (email/password only)
+
+- Email + password signup and login. **No Google OAuth in this version** — structure the code so Google can be added later without a rewrite.
+- Password hashing: bcrypt, cost factor 12.
+- Sessions: JWT in an httpOnly, secure cookie.
+- **"Remember me" / stay logged in:** when checked, issue a long-lived (30-day) session so the user is NOT asked to log in again on the next visit. When unchecked, use a short session that ends with the browser session.
+- Login form inputs must use proper autocomplete attributes (`autocomplete="email"`, `autocomplete="current-password"`, signup uses `new-password`) so the **browser's native password manager** can offer to save/autofill. Do not build any custom password-saving — the browser handles that.
+- **Phone OTP is NOT in this version.** Phone is collected and stored, required, and unique, but not verified. Structure so OTP can be added later.
+
+---
+
+## 4. SIGNUP FORM (multi-step / branching)
+
+Collect and validate:
+
+1. **Name** — required.
+2. **Phone** — required, India only, 10 digits, displayed with a fixed `+91` prefix. **Must be unique** across all accounts. Store the 10-digit number.
+3. **Email** — required, valid email, **must be unique**.
+4. **Password** — required, min 8 chars (enforce a reasonable strength rule).
+5. **City** — required. Dropdown of all major Indian cities (searchable dropdown). Provide a comprehensive India city list.
+6. **Education type toggle** — "School" or "College" (radio/toggle). Then **conditional branching**:
+   - If **School** → next field: **Class**, dropdown with options **7th, 8th, 9th, 10th, 11th, 12th**.
+   - If **College** → next field: **Degree level**, dropdown **Diploma / Bachelor's / Master's** → then **Year**, dropdown **1st, 2nd, 3rd, 4th, 5th**.
+   - Also let them type their **school/college name** (free text).
+7. **Expertise** — **searchable dropdown multi-select**, **strict list only (no custom entries)**, **maximum 3 selections**. Enforce the max-3 limit in the UI and on the server. Use the exact list in Appendix A. Flat alphabetical list with a search bar inside the dropdown.
+
+Server enforces: unique phone, unique email, max 3 expertise, expertise values must be from the allowed list, valid education branch combination.
+
+---
+
+## 5. DASHBOARD (logged-in home)
+
+- Shows the user's **own profile**: name, city, education (school+class OR college+degree+year), expertise tags, phone, email, avatar.
+- **Edit mode:** user can update any field later (name, city, education, expertise, phone, email, password, avatar). Same validation rules apply on edit (uniqueness, max-3 expertise, allowed-list).
+- **Availability toggle** — a small tick/switch on the dashboard:
+  - **Default = Available (Active).**
+  - **Available:** the member's card appears in **full colour** in the Our Parivaar directory.
+  - **Not available:** the member's card still appears in the directory but rendered in **grayscale / black-and-white**. Do NOT write "not available" or any label anywhere on the card — only the grayscale styling communicates it.
+  - Toggle is changeable anytime from the dashboard; change reflects in the directory immediately.
+
+---
+
+## 6. OUR PARIVAAR — MEMBER DIRECTORY
+
+- Lists all members as cards. Search + filter by **city** and **expertise**.
+- **Logged-out visitors:** can browse the directory and see each member's **Name + City + Expertise only**. **No contact info** (no phone, no email, no contact button). Show a "Sign up / Login to connect" prompt in place of contact.
+- **Logged-in members:** see the **full profile including contact info** (phone/email/contact action).
+- **Availability/grayscale rule applies in both states:** members marked not-available render in grayscale; available members render in full colour. No text label either way.
+
+---
+
+## 7. DATA MODEL (Prisma — adjust to existing schema)
+
+A `User` model with at least: id, name, email (unique), phone (unique), passwordHash, city, educationType (enum: SCHOOL | COLLEGE), schoolOrCollegeName, schoolClass (nullable), degreeLevel (nullable enum: DIPLOMA | BACHELORS | MASTERS), collegeYear (nullable), expertise (array/relation, max 3, constrained to allowed list), avatarUrl (nullable), isAvailable (boolean, default true), createdAt, updatedAt, plus session/auth fields as needed. Use migrations, not db push.
+
+---
+
+## APPENDIX A — EXPERTISE LIST (strict, exact, alphabetical)
+
+Accountant, Actor, Actuary, Advertising Specialist, Agriculture Consultant, AI Consultant, AI Engineer, AI Researcher, Android Developer, Animator, App Developer, Architect, Art Director, Artist, Astronomer, Athlete, Attorney, Audio Engineer, Author, Automation Specialist, Backend Developer, Baker, Banker, Behavioral Scientist, Biologist, Blockchain Developer, Blogger, Brand Manager, Brand Strategist, Business Analyst, Business Consultant, Business Developer, Business Strategist, Career Coach, Cartographer, Cartoonist, Chef, Chemical Engineer, Choreographer, Cinematographer, Civil Engineer, Cloud Engineer, Coach, Coder, Communication Coach, Community Manager, Compliance Officer, Composer, Content Creator, Content Strategist, Copywriter, Corporate Trainer, Counselor, Creative Director, Creative Writer, Criminologist, Customer Success Manager, Cybersecurity Specialist, Data Analyst, Data Engineer, Data Scientist, Database Administrator, Debater, Dentist, Designer, Developer, DevOps Engineer, Dietitian, Digital Artist, Digital Marketer, Diplomat, Documentary Filmmaker, Drone Pilot, Economist, Editor, Education Consultant, Electrical Engineer, Entrepreneur, Environmental Consultant, Environmental Scientist, Ethical Hacker, Event Manager, Fashion Designer, Film Director, Film Producer, Financial Advisor, Financial Analyst, Fitness Coach, Food Blogger, Food Scientist, Frontend Developer, Full Stack Developer, Fundraising Specialist, Game Designer, Game Developer, Graphic Designer, Growth Marketer, Historian, HR Specialist, Illustrator, Industrial Designer, Influencer, Innovation Consultant, Interior Designer, Investment Analyst, Investor, Journalist, Language Trainer, Law Student, Lawyer, Leadership Coach, Legal Consultant, Life Coach, Logistics Manager, Machine Learning Engineer, Management Consultant, Manufacturer, Market Researcher, Marketing Manager, Mechanical Engineer, Mediator, Mentor, Mobile Developer, Model, Moderator, Motion Designer, Motivational Speaker, Music Producer, Musician, Negotiation Expert, Network Engineer, News Anchor, Nutritionist, Operations Manager, Painter, Patent Consultant, Performance Marketer, Personal Trainer, Pharmacist, Photographer, Photo Editor, Physician, Physicist, Podcast Host, Political Analyst, Product Designer, Product Manager, Professor, Program Manager, Programmer, Project Manager, Proofreader, Prompt Engineer, Psychologist, Public Relations Specialist, Public Speaker, Publisher, QA Engineer, Quality Analyst, Quality Manager, Real Estate Consultant, Receptionist, Recruiter, Research Analyst, Researcher, Robotics Engineer, Sales Executive, Sales Manager, Scientist, Screenwriter, Script Writer, SEO Specialist, Singer, Social Media Manager, Software Engineer, Software Tester, Sound Designer, Sports Coach, Sports Analyst, Statistician, Stock Trader, Story Writer, Strategist, Student Mentor, Supply Chain Manager, Sustainability Consultant, Teacher, Technical Writer, Technology Consultant, Translator, Tutor, UI Designer, UX Designer, Urban Planner, Video Editor, Videographer, Virtual Assistant, Visual Designer, Voice Actor, Voice Over Artist, Volunteer Coordinator, Web Designer, Web Developer, Wedding Planner, Wellness Coach, Wildlife Photographer, Writer, YouTuber
+
+---
+
+## BUILD RULES
+
+- Do not rebuild existing homepage/navbar/hero/stats — extend only.
+- TypeScript strict. Zod validation client + server. Service layer for logic.
+- Prisma migrations. Enforce all uniqueness and limits at the database + server level, not just UI.
+- Match existing design system (teal / light blue / dark navy, existing fonts and component styling).
+- Mobile-first responsive.

@@ -1,0 +1,17 @@
+export const INDIA_CITIES: string[] = [
+  "Agra", "Ahmedabad", "Ajmer", "Aligarh", "Allahabad (Prayagraj)", "Amravati", "Amritsar",
+  "Aurangabad", "Bareilly", "Belgaum", "Bengaluru", "Bhavnagar", "Bhilai", "Bhiwandi",
+  "Bhopal", "Bhubaneswar", "Bikaner", "Chandigarh", "Chennai", "Coimbatore", "Cuttack",
+  "Dehradun", "Delhi", "Dhanbad", "Durgapur", "Erode", "Faridabad", "Firozabad", "Gandhinagar",
+  "Ghaziabad", "Gorakhpur", "Gtuwahati", "Gurugram", "Guntur", "Gwalior", "Howrah", "Hubli-Dharwad",
+  "Hyderabad", "Indore", "Jabalpur", "Jaipur", "Jalandhar", "Jammu", "Jamnagar", "Jamshedpur",
+  "Jhansi", "Jodhpur", "Kakinada", "Kalyan-Dombivli", "Kanpur", "Kochi", "Kolhapur", "Kolkata",
+  "Kollam", "Kota", "Kozhikode", "Lucknow", "Ludhiana", "Madurai", "Maheshtala", "Malegaon",
+  "Mangaluru", "Mathura", "Meerut", "Moradabad", "Mumbai", "Muzaffarnagar", "Muzaffarpur",
+  "Mysuru", "Nagpur", "Nanded", "Nashik", "Nellore", "Noida", "Panaji", "Panipat", "Patna",
+  "Pimpri-Chinchwad", "Pondicherry (Puducherry)", "Prayagraj", "Pune", "Raipur", "Rajahmundry",
+  "Rajkot", "Ranchi", "Rourkela", "Saharanpur", "Salem", "Sangli", "Shimla", "Siliguri",
+  "Solapur", "Srinagar", "Surat", "Thane", "Thiruvananthapuram", "Thrissur", "Tiruchirappalli",
+  "Tirunelveli", "Tirupati", "Tirupur", "Udaipur", "Ujjain", "Vadodara", "Varanasi", "Vasai-Virar",
+  "Vijayawada", "Visakhapatnam", "Warangal",
+].sort((a, b) => a.localeCompare(b));

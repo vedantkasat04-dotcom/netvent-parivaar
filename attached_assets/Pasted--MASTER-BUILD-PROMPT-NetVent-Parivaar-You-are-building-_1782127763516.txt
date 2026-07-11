@@ -1,0 +1,293 @@
+# MASTER BUILD PROMPT — NetVent Parivaar
+
+You are building a production-grade, full-stack web application called **NetVent Parivaar**, a youth networking community platform for Indian students. Build the COMPLETE system: frontend, backend, database, authentication, authorization, admin dashboard, APIs, storage layer, and deployment configuration. This is NOT a mockup, NOT a frontend-only site, and NOT placeholder architecture. Treat the backend as a first-class system. Use TypeScript everywhere. Write clean, modular, well-typed, production-ready code that can scale to thousands of members without a rewrite.
+
+---
+
+## 1. TECHNOLOGY STACK (mandatory)
+
+- **Language:** TypeScript end-to-end (strict mode enabled).
+- **Frontend:** Next.js 14+ (App Router), React, Tailwind CSS, mobile-first responsive design.
+- **Backend:** Next.js Route Handlers (API layer) organized as a proper service/controller/repository architecture. Do not put business logic in route files.
+- **Database:** PostgreSQL.
+- **ORM:** Prisma (with migrations, not db push).
+- **Auth:** JWT-based session auth with httpOnly secure cookies; bcrypt for password hashing (cost factor 12).
+- **Validation:** Zod for all input validation on both client and server.
+- **File/Image Storage:** Cloudinary (or S3-compatible storage) with signed uploads. Never store binaries in the database.
+- **State/Data fetching (frontend):** TanStack Query (React Query).
+- **Forms:** React Hook Form + Zod resolver.
+- **Email:** Resend (transactional emails).
+- **Maps:** Lightweight inline SVG India map (no heavy maps SDK).
+- **Analytics-ready:** structure events but keep V1 minimal.
+
+Generate a clean `.env.example` and load all secrets from environment variables. Never hardcode secrets.
+
+---
+
+## 2. PROJECT ARCHITECTURE & FOLDER STRUCTURE
+
+Create this structure:
+
+```
+/src
+  /app
+    /(public)            # logged-out routes: home, about, directory preview, events, team, login, signup, legal
+    /(auth)              # authenticated routes: feed, join-parivaar, my-parivaar, groups, profile, settings, notifications
+    /(admin)             # admin dashboard routes (role-gated)
+    /api                 # route handlers -> call controllers only
+  /server
+    /controllers         # request/response orchestration, calls services
+    /services            # business logic (approval, ID generation, RSVP, moderation)
+    /repositories        # all DB access via Prisma, isolated here
+    /middleware          # auth, role guards, rate limiting, error handler
+    /validators          # Zod schemas shared by client+server
+    /lib                 # jwt, hashing, cloudinary, email, whatsapp link builder
+    /errors              # typed AppError classes
+  /components
+    /ui                  # reusable primitives (Button, Input, Modal, Card, Badge, Avatar, Toast)
+    /shared              # MemberCard, EventCard, GroupCard, ProfileView, SearchFilters, IndiaMap
+    /layout              # Navbar, Footer, Sidebar, AdminShell
+  /hooks
+  /types
+/prisma
+  schema.prisma
+  /migrations
+```
+
+Enforce separation of concerns: **route handler → controller → service → repository → Prisma**. No layer skips.
+
+---
+
+## 3. DATABASE ARCHITECTURE
+
+Use PostgreSQL with full normalization, foreign keys, constraints, and indexes. Define these tables via Prisma schema.
+
+### users
+- `id` (uuid, pk)
+- `name` (string, required)
+- `email` (string, unique, required, lowercased)
+- `password_hash` (string, required)
+- `role` (enum: BASIC, MEMBER, MODERATOR, ADMIN; default BASIC)
+- `created_at`, `updated_at` (timestamps)
+- Index on `email`, `role`.
+
+### member_profiles (one-to-one with users)
+- `id` (uuid, pk)
+- `user_id` (uuid, fk → users.id, unique, cascade)
+- `member_id` (string, unique, nullable until approved — format `NVP0001`)
+- `full_name`, `profile_photo_url`, `age` (int), `city_id` (fk), `state_id` (fk)
+- `institution` (school/college), `class_year`
+- `phone`, `whatsapp` (strings, nullable)
+- `bio` (text)
+- `instagram_url`, `linkedin_url`, `portfolio_url` (nullable, URL-validated)
+- `status` (enum: PENDING, APPROVED, REJECTED; default PENDING)
+- `rejection_reason` (nullable)
+- `approved_by` (uuid fk → users.id, nullable), `approved_at` (nullable)
+- `privacy_settings` (jsonb: which fields are public; phone/whatsapp default private; force-private if age < 18)
+- `created_at`, `updated_at`
+- Indexes on `status`, `city_id`, `state_id`, `member_id`.
+- Constraint: `member_id` only set when `status = APPROVED`.
+
+### skills (lookup) & member_skills (join, many-to-many)
+- skills: `id`, `name` (unique). Seed: Video Editing, Graphic Design, Photography, Content Writing, Coding, Website Development.
+- member_skills: `member_profile_id` fk, `skill_id` fk, composite unique. Index both fks.
+
+### states & cities
+- states: `id`, `name` (unique).
+- cities: `id`, `name`, `state_id` fk, `status` (enum: ACTIVE, UPCOMING), `city_lead_id` (nullable fk → users). Seed cities: Ahmedabad (ACTIVE), Vadodara (ACTIVE), Pune (UPCOMING), Bangalore (UPCOMING). Index `status`.
+
+### groups
+- `id`, `name` (unique), `description`, `moderator_id` (fk → users, nullable), `created_at`.
+- group_members: `group_id` fk, `member_profile_id` fk, composite unique.
+
+### posts (group feed + announcements + resources)
+- `id`, `group_id` (fk, nullable for global feed), `author_id` (fk → users), `type` (enum: DISCUSSION, ANNOUNCEMENT, RESOURCE), `content` (text), `resource_url` (nullable), `created_at`. Index `group_id`, `type`.
+
+### events
+- `id`, `title`, `description` (text), `venue`, `event_date` (timestamp), `status` (enum: UPCOMING, PAST), `cover_image_url`, `created_at`. Index `status`, `event_date`.
+- event_photos: `id`, `event_id` fk, `photo_url`.
+- event_sponsors: `id`, `event_id` fk, `name`, `logo_url` (nullable).
+- event_rsvps: `event_id` fk, `member_profile_id` fk, composite unique.
+- Seed past events: NetVent Ahmedabad, NetVent Vadodara, Collaboration with Saatvik NGO, NetVent Vadodara 2.0.
+
+### team_members
+- `id`, `name`, `role_title`, `photo_url`, `section` (enum: FOUNDER, CORE, ADVISOR), `display_order` (int), `social_links` (jsonb). Seed founders: Vedant Kasat, Parth Kasat.
+
+### notifications
+- `id`, `user_id` fk, `type`, `payload` (jsonb), `read` (bool default false), `created_at`. Index `user_id`, `read`.
+
+### reports (moderation)
+- `id`, `reporter_id` fk, `target_type` (enum: POST, PROFILE), `target_id`, `reason`, `status` (enum: OPEN, RESOLVED), `created_at`.
+
+### audit_logs (accountability — required)
+- `id`, `actor_id` fk → users, `action` (string), `entity_type`, `entity_id`, `metadata` (jsonb), `created_at`. Index `actor_id`, `entity_type`.
+
+All FKs use appropriate ON DELETE behavior (cascade for owned data, restrict where audit integrity matters). Every table has `created_at`; mutable tables have `updated_at`.
+
+---
+
+## 4. AUTHENTICATION FLOW
+
+- **Signup (basic):** name, email, password → validate with Zod → hash password (bcrypt 12) → create `users` row with role BASIC → issue JWT in httpOnly, secure, sameSite cookie. Basic users are NOT members.
+- **Login:** verify credentials → issue session cookie. Rate-limit login attempts.
+- **Logout:** clear cookie.
+- **Session:** middleware reads JWT from cookie, attaches user to request context. Provide `/api/auth/me`.
+- **Password rules:** min 8 chars, enforced via Zod.
+- Tokens expire (e.g., 7 days), with secure refresh on activity.
+
+## 5. AUTHORIZATION & PERMISSIONS
+
+Role hierarchy: BASIC < MEMBER < MODERATOR < ADMIN.
+- BASIC: signup, browse public + limited directory, submit Join Parivaar.
+- MEMBER: full directory (per privacy), groups, feed, RSVP, own profile/settings.
+- MODERATOR: MEMBER + moderate posts/reports + (optionally) approve members for their city.
+- ADMIN: full access to admin dashboard and all CRUD.
+
+Implement `requireAuth()` and `requireRole(...roles)` middleware. Every admin and member API route is guarded server-side. Never trust the client for authorization. Row-level checks: users can only edit their own profile unless ADMIN.
+
+---
+
+## 6. MEMBER APPROVAL WORKFLOW
+
+1. BASIC user submits **Join Parivaar** form (multi-step; all fields validated server-side; URLs validated; age numeric). Status set to PENDING.
+2. If `age < 18`, force `privacy_settings.phone = private` and `whatsapp = private` (non-overridable).
+3. Application enters admin/moderator queue.
+4. Admin action:
+   - **Approve:** atomically generate next sequential `member_id` (`NVP` + zero-padded counter via a DB transaction/sequence to prevent race conditions), set status APPROVED, set role MEMBER, set `approved_by`/`approved_at`, write audit_log, send welcome email + notification.
+   - **Reject:** set REJECTED + `rejection_reason`, notify, audit_log.
+   - **Request info:** keep PENDING, notify.
+5. Only APPROVED members appear in the public Member Directory.
+
+Member ID generation MUST be transaction-safe and gapless under concurrency.
+
+---
+
+## 7. API ENDPOINTS
+
+Design RESTful, versioned (`/api/v1/...`), consistent JSON envelopes `{ success, data, error }`. Examples (implement full CRUD per resource):
+
+**Auth:** `POST /auth/signup`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.
+
+**Membership:** `POST /membership/apply`, `GET /membership/status`, `PATCH /membership/me` (edit own profile + privacy).
+
+**Directory:** `GET /members` (search + filters: `?q=&city=&state=&skills=` paginated), `GET /members/:memberId` (returns only fields allowed by that member's privacy_settings; viewer must be MEMBER+).
+
+**Admin members:** `GET /admin/members?status=pending`, `POST /admin/members/:id/approve`, `POST /admin/members/:id/reject`, `PATCH /admin/members/:id`, `DELETE /admin/members/:id`.
+
+**Events:** `GET /events?status=`, `GET /events/:id`, `POST /events/:id/rsvp`; admin `POST/PATCH/DELETE /admin/events`, plus photo & sponsor sub-routes.
+
+**Groups:** `GET /groups`, `GET /groups/:id`, `POST /groups/:id/posts`, `POST /groups/:id/join`; admin `POST/PATCH/DELETE /admin/groups`.
+
+**Team:** `GET /team`; admin `POST/PATCH/DELETE /admin/team`.
+
+**Cities:** `GET /cities`; admin `POST/PATCH/DELETE /admin/cities` + status management.
+
+**Notifications:** `GET /notifications`, `PATCH /notifications/:id/read`.
+
+**Reports:** `POST /reports`; admin `GET /admin/reports`, `PATCH /admin/reports/:id/resolve`.
+
+Paginate all list endpoints (cursor or offset+limit). Validate all inputs with Zod. Return typed errors.
+
+---
+
+## 8. SEARCH & FILTERING ARCHITECTURE
+
+Directory search: case-insensitive match on name; filters on city, state, and skills (skills via join). Build a single composable query in the repository layer. Use Postgres indexes on filtered columns; add a GIN/trigram index on `full_name` for fast partial search. Paginate results. Return only directory-safe fields in list view (photo, name, skills).
+
+## 9. IMAGE UPLOAD ARCHITECTURE
+
+- Client requests a **signed upload signature** from `POST /uploads/sign` (auth required).
+- Client uploads directly to Cloudinary with the signature.
+- Store only the returned secure URL + public_id in the DB.
+- Enforce file type (jpg/png/webp), max size (~5MB), auto-optimize and resize on Cloudinary (important for Indian mobile networks).
+- Used for: profile photos, event covers/photos, sponsor logos, team photos.
+
+## 10. WHATSAPP INTEGRATION
+
+- No third-party API needed for V1 contact: generate `https://wa.me/<number>` deep links.
+- A profile's WhatsApp button is rendered ONLY if `privacy_settings.whatsapp = public` AND member is 18+.
+- Normalize numbers to international format (+91) before building the link. Never expose raw numbers in the directory list view.
+
+---
+
+## 11. ADMIN DASHBOARD ARCHITECTURE
+
+Route group `(admin)` gated by `requireRole(ADMIN)` (MODERATOR scoped where relevant). Sections:
+- **Members:** queue with filters, view, approve, reject, edit, delete; shows audit trail.
+- **Events:** create/edit/delete, manage photos & sponsors, toggle upcoming/past.
+- **Groups:** create/edit/delete, assign moderator.
+- **Team:** add/edit/delete, reorder, set section.
+- **Cities:** manage active vs upcoming, assign city lead.
+- **Reports:** moderation queue.
+Use a shared `AdminShell` layout with sidebar nav, server-side role check on every page and API call, optimistic UI via React Query, and confirmation modals for destructive actions.
+
+## 12–13. FRONTEND ARCHITECTURE & RESPONSIVE UI
+
+- Mobile-first Tailwind; design for phone screens first, scale up. Test breakpoints sm/md/lg.
+- Public pages SSR/SSG for SEO (homepage, about, events, team, directory preview).
+- Authenticated pages client-rendered with React Query.
+- Homepage sections: Hero ("Bharat ka apna Parivaar" + "Join NetVent" CTA), About, Cities (Active/Upcoming), interactive SVG India Map, Featured Members, Groups preview, Events preview, Founders, Core Team.
+- Pages/routes: Home, About/FAQ, Directory, Member Profile, Join Parivaar (multi-step + progress bar), Application Status, My Parivaar dashboard, Groups, Group detail (Feed/Announcements/Resources/Members tabs), Events (Upcoming/Past), Event detail, Team, Notifications, Settings & Privacy, Login, Signup, Privacy/Terms/Community Guidelines/Contact, 404 + empty states.
+
+## 14. REUSABLE COMPONENTS
+
+`/ui`: Button, Input, Textarea, Select, MultiSelect (skills), Modal, Card, Badge, Avatar, Toast, Spinner, Pagination, Tabs, ProgressBar.
+`/shared`: MemberCard, ProfileView (privacy-aware), EventCard, GroupCard, SearchFilters, IndiaMap, RSVPButton, WhatsAppButton, ShareableMemberIdCard.
+
+---
+
+## 15. ERROR HANDLING
+
+- Central typed error classes (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`).
+- Global API error middleware → consistent `{ success:false, error:{ code, message } }`, correct HTTP status, no stack leaks in production.
+- Client: error boundaries, toast notifications, form-level field errors from Zod.
+- Log server errors with context (no secrets).
+
+## 16. SECURITY MEASURES
+
+- bcrypt password hashing; JWT in httpOnly/secure/sameSite cookies.
+- Server-side validation on every input (Zod); never trust client.
+- Authorization checks on every protected route.
+- Rate limiting (login, signup, apply, uploads).
+- Helmet-style security headers, CORS locked to app origin.
+- SQL-injection safe via Prisma parameterization.
+- Sanitize user-generated content (posts/bio) to prevent XSS.
+- Privacy-by-default for phone/WhatsApp; hard-block public contact for minors.
+- Audit logging on all admin mutations.
+- Secrets only via env vars.
+
+---
+
+## 17. ENVIRONMENT VARIABLES (`.env.example`)
+
+```
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=7d
+BCRYPT_ROUNDS=12
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+RESEND_API_KEY=
+APP_URL=
+NODE_ENV=
+```
+
+## 18. DEPLOYMENT INSTRUCTIONS
+
+- Provision PostgreSQL; set `DATABASE_URL`.
+- Run `prisma migrate deploy` then a `seed` script (skills, states, cities, founders, past events).
+- Build with `next build`; serve with `next start`.
+- Set all env vars in Replit Secrets.
+- Configure health-check route `/api/health`.
+- Enable HTTPS; set secure cookie flags in production.
+
+## 19. FUTURE SCALABILITY CONSIDERATIONS (architect for, do not build in V1)
+
+- Member-created groups with moderation; internal direct messaging (to retire public phone numbers); reputation/badges; mentorship matching; WhatsApp Business API + push notifications; regional language (Hindi/Gujarati) i18n; native mobile app sharing API contracts; city-lead delegated admin; read replicas, caching layer (Redis), and queue (BullMQ) for emails/notifications. Keep services decoupled so these slot in without a rewrite.
+
+---
+
+## FINAL INSTRUCTIONS
+
+Build the entire system now: complete frontend, complete backend, complete normalized PostgreSQL database via Prisma migrations, complete secure authentication and authorization, complete admin dashboard, complete REST APIs, complete image storage layer, and seed data. Use TypeScript strict mode throughout, enforce the layered architecture (route → controller → service → repository), validate everything with Zod, and follow the security and scalability requirements above. Produce clean, modular, production-ready code — not placeholders.
