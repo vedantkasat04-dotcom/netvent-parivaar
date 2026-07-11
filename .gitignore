@@ -11,3 +11,4 @@ build/
 netvent_part_*
 .replit
 replit.nix
+replit.md
