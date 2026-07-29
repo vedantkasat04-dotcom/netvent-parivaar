@@ -103,9 +103,9 @@ function HeroSection() {
           alt="NetVent community"
           className="w-full block"
           style={{
-            height: "auto",
-            maxHeight: "92vh",
-            objectFit: "contain",
+            height: "92vh",
+            objectFit: "cover",
+            objectPosition: HERO_IMAGES[current].objectPosition,
             background: "#0E1B2A",
             opacity: fading ? 0 : 1,
             transition: "opacity 0.45s ease-in-out",
