@@ -91,8 +91,7 @@ function HeroSection() {
 
   const badge = useFadeUp(0);
   const headline = useFadeUp(150);
-  const sub = useFadeUp(300);
-  const ctas = useFadeUp(450);
+  const ctas = useFadeUp(300);
 
   return (
     <section style={{ background: LIGHT_BLUE }}>
@@ -148,15 +147,9 @@ function HeroSection() {
         </div>
 
         <div ref={headline.ref} style={headline.style}>
-          <h1 className="font-heading font-bold leading-tight mb-6" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: NAVY }}>
+          <h1 className="font-heading font-bold leading-tight mb-10" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: NAVY }}>
             Where Bharat's Youth Interact to<br />Connect, Collaborate, and Lead.
           </h1>
-        </div>
-
-        <div ref={sub.ref} style={sub.style}>
-          <p className="text-lg md:text-xl leading-relaxed mb-10 mx-auto" style={{ color: "#4A5568", maxWidth: "600px" }}>
-            NetVent Parivaar is Gujarat's most active youth community — built on real events, real friendships, and a family that stays with you long after the event ends.
-          </p>
         </div>
 
         <div ref={ctas.ref} style={ctas.style} className="flex flex-col sm:flex-row items-center justify-center gap-4">
