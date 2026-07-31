@@ -149,7 +149,7 @@ function HeroSection() {
 
         <div ref={headline.ref} style={headline.style}>
           <h1 className="font-heading font-bold leading-tight mb-6" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: NAVY }}>
-            Where Gujarat's Youth Come to<br />Connect, Lead, and Belong.
+            Where Bharat's Youth Interact to<br />Connect, Collaborate, and Lead.
           </h1>
         </div>
 
