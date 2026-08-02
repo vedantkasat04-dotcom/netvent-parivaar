@@ -217,57 +217,54 @@ function WhatIsNetVent() {
   const p1 = useFadeUp(100);
   const p2 = useFadeUp(200);
   const p3 = useFadeUp(300);
-  const card = useFadeUp(400);
+  const h2 = useFadeUp(400);
   const p4 = useFadeUp(500);
-  const closing = useFadeUp(600);
+  const p5 = useFadeUp(600);
+  const closing = useFadeUp(700);
 
   return (
     <section className="py-24 px-4" style={{ background: "#F0F9F8" }}>
       <div className="container mx-auto max-w-2xl">
-        <div ref={h.ref} style={{ ...h.style, textAlign: "center", marginBottom: "48px" }}>
+        <div ref={h.ref} style={{ ...h.style, textAlign: "center", marginBottom: "40px" }}>
           <h2 className="font-heading font-bold mb-4" style={{ fontSize: "clamp(2rem, 4vw, 2.75rem)", color: NAVY }}>
             What is <em style={{ color: TEAL, fontStyle: "italic" }}>NetVent</em>?
           </h2>
-          <p className="text-xl font-semibold" style={{ color: NAVY }}>
-            NetVent is more than events.{" "}
-            <em style={{ color: TEAL, fontStyle: "italic" }}>It's a feeling.</em>
+          <p className="text-xl font-semibold" style={{ color: TEAL, fontStyle: "italic" }}>
+            Networking through Events.
           </p>
         </div>
 
         <div className="space-y-6 text-base md:text-lg leading-relaxed" style={{ color: "#4A5568" }}>
           <div ref={p1.ref} style={p1.style}>
-            <p>NetVent Parivaar didn't begin as an organisation — it began as a belief: that the best moments of any event never happen on stage. They happen in the in-between.</p>
+            <p>We design and host academic and co-curricular experiences — ranging from high-energy Model UN conferences to community nights and specialised activities. Every event we put together has one main goal in mind: bringing the right people together.</p>
           </div>
+
           <div ref={p2.ref} style={p2.style}>
-            <p>In the late-night conversations that feel more real than any formal session. In the laughter after it all ends, when no one is ready to leave. In friendships formed with people who, just hours earlier, were complete strangers.</p>
+            <p>We take traditional gatherings and turn them into spaces where real ideas are shared and conversations actually mean something. Every room we set up is meant to connect what you learn in theory with what you do in the real world — making sure every chat you have could lead to your next big collaboration.</p>
           </div>
+
           <div ref={p3.ref} style={p3.style}>
-            <p className="font-semibold italic text-xl" style={{ color: TEAL }}>That's where NetVent lives.</p>
-            <p className="mt-4">We design and host experiences — from high-energy Model UN conferences to community nights and networking events. But what we're really building isn't just events. We're building a space where young people feel seen, connected, and alive.</p>
-            <p className="mt-4">Every experience is intentional — not just in how it runs, but in how it feels.</p>
+            <p className="font-semibold text-xl" style={{ color: NAVY }}>The right people. The right rooms. The right conversations.</p>
+          </div>
+        </div>
+
+        {/* Welcome to the Parivaar sub-section */}
+        <div ref={h2.ref} style={{ ...h2.style, textAlign: "center", marginTop: "72px", marginBottom: "32px" }}>
+          <h3 className="font-heading font-bold mb-3" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.25rem)", color: NAVY }}>
+            Welcome to the <em style={{ color: TEAL, fontStyle: "italic" }}>Parivaar</em>
+          </h3>
+        </div>
+
+        <div className="space-y-6 text-base md:text-lg leading-relaxed" style={{ color: "#4A5568" }}>
+          <div ref={p4.ref} style={p4.style}>
+            <p>We are building much more than just a platform for events. We are a Parivaar — a youth community that works with the ambition of professionals while supporting each other like a family. At NetVent Parivaar, you never just attend an event and go home. You become part of a network that stays with you.</p>
           </div>
 
-          <div ref={card.ref} style={{ ...card.style, marginTop: "32px" }}>
-            <div className="rounded-2xl p-7"
-              style={{ background: "rgba(255,255,255,0.85)", border: `1.5px solid rgba(63,167,150,0.22)`, boxShadow: "0 4px 24px rgba(63,167,150,0.08)" }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: TEAL }}>We think about:</p>
-              <div className="space-y-4">
-                {["Who you will meet", "What you will feel", "What you will remember months later"].map(pt => (
-                  <div key={pt} className="flex items-start gap-3">
-                    <span className="text-lg font-bold mt-0.5" style={{ color: TEAL }}>→</span>
-                    <span className="font-medium" style={{ color: NAVY }}>{pt}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div ref={p5.ref} style={p5.style}>
+            <p>That means having a group of peers who actually celebrate your wins, help you out through challenges, and push you to reach your full potential. We want to move away from networking that feels forced or transactional. Instead, we focus on building genuine relationships — so that long after the event is over, you still have a community standing right by your side.</p>
           </div>
 
-          <div ref={p4.ref} style={p4.style} className="space-y-4 mt-4">
-            <p>Because the real success of an event is not measured in attendance — it is measured in the stories people carry forward.</p>
-            <p>At NetVent Parivaar, you do not just attend. You become part of something — a community that grows with you, a network that stays with you, a feeling that keeps bringing you back.</p>
-          </div>
-
-          <div ref={closing.ref} style={{ ...closing.style, textAlign: "center", paddingTop: "16px" }}>
+          <div ref={closing.ref} style={{ ...closing.style, textAlign: "center", paddingTop: "24px" }}>
             <p className="font-bold italic" style={{ fontSize: "clamp(1.4rem, 3vw, 2rem)", color: TEAL }}>
               It becomes your Parivaar.
             </p>
@@ -362,7 +359,7 @@ function CTABanner() {
             Ready to Find Your People?
           </h2>
           <p className="text-lg mb-10 mx-auto" style={{ color: "rgba(255,255,255,0.8)", maxWidth: "480px" }}>
-            Join a community of driven young people from across Gujarat and beyond. Your Parivaar is waiting.
+            Join a community of driven young people from across Bharat and beyond. Your Parivaar is waiting.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/join">
