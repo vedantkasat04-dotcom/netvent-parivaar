@@ -276,10 +276,10 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
   const [imgErr, setImgErr] = useState(false);
 
   return (
-    <div ref={fade.ref} style={fade.style}>
-      <div className="group rounded-2xl overflow-hidden transition-all duration-400 hover:-translate-y-2"
+    <div ref={fade.ref} style={{ ...fade.style, height: "100%" }}>
+      <div className="group rounded-2xl overflow-hidden transition-all duration-400 hover:-translate-y-2 h-full flex flex-col"
         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 32px rgba(0,0,0,0.25)" }}>
-        <div className="w-full overflow-hidden" style={{ aspectRatio: "4/3", background: "linear-gradient(135deg, #1a3040, #3FA796)" }}>
+        <div className="w-full overflow-hidden flex-shrink-0" style={{ aspectRatio: "4/3", background: "linear-gradient(135deg, #1a3040, #3FA796)" }}>
           {!imgErr ? (
             <img src={photoSrc} alt={name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
               onError={() => setImgErr(true)} />
@@ -291,7 +291,7 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
             </div>
           )}
         </div>
-        <div className="p-7">
+        <div className="p-7 flex-1 flex flex-col">
           <h3 className="font-heading font-bold text-2xl text-white mb-1">{name}</h3>
           <p className="text-sm font-semibold mb-5" style={{ color: TEAL }}>{title}</p>
           <blockquote className="pl-4 italic leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", borderLeft: `3px solid ${TEAL}`, fontSize: "0.95rem" }}>
@@ -317,7 +317,7 @@ function FoundersDesk() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           <FounderCard
             name="Parth Kasat"
             title="Founder"
