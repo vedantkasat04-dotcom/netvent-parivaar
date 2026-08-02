@@ -41,7 +41,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
                 Bharat ka apna Parivaar
               </p>
-              <a href="mailto:hello@netventparivaar.com"
+              <a href="mailto:netventparivaar@gmail.com"
                 className="flex items-center gap-2 text-sm group transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}>
                 <Mail className="w-4 h-4" style={{ color: "rgba(255,255,255,0.35)" }} />
