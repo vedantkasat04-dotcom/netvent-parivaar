@@ -95,7 +95,7 @@ function HeroSection() {
 
   return (
     <section style={{ background: LIGHT_BLUE }}>
-      {/* Full-bleed photo — no overlay, no cropping */}
+      {/* Full-bleed photo */}
       <div className="relative w-full overflow-hidden">
         <img
           src={HERO_IMAGES[current].src}
@@ -110,7 +110,6 @@ function HeroSection() {
             transition: "opacity 0.45s ease-in-out",
           }}
         />
-        {/* Prev/next arrows */}
         <button onClick={prev} aria-label="Previous"
           className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full transition-all hover:scale-110 focus:outline-none"
           style={{ background: "rgba(14,27,42,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
@@ -121,7 +120,6 @@ function HeroSection() {
           style={{ background: "rgba(14,27,42,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <ChevronRight className="w-5 h-5 text-white" />
         </button>
-        {/* Dot indicators */}
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           {HERO_IMAGES.map((_, i) => (
             <button key={i} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`}
@@ -132,9 +130,7 @@ function HeroSection() {
         </div>
       </div>
 
-      {/* Text content below the photo */}
       <div className="container mx-auto px-4 pt-14 pb-20 text-center max-w-3xl">
-        {/* Badge with pulse dot */}
         <div ref={badge.ref} style={badge.style} className="mb-8 flex justify-center">
           <span className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold"
             style={{ background: "rgba(255,255,255,0.9)", color: TEAL, border: `1.5px solid rgba(63,167,150,0.3)`, boxShadow: "0 2px 12px rgba(63,167,150,0.12)" }}>
@@ -205,7 +201,7 @@ function StatsBanner() {
           <StatItem icon={<Users className="w-7 h-7" />} value={600} suffix="+" label="Youth Connected" delay={0} />
           <StatItem icon={<MapPin className="w-7 h-7" />} value={3} suffix="" label="Cities Covered" delay={100} />
           <StatItem icon={<Heart className="w-7 h-7" />} value={75} suffix="+" label="Parivaar Members" delay={200} />
-          <StatItem icon={<Calendar className="w-7 h-7" />} value={4} suffix="+" label="Events Organised" delay={300} />
+          <StatItem icon={<Calendar className="w-7 h-7" />} value={4} suffix="" label="Events Organised" delay={300} />
         </div>
       </div>
     </section>
@@ -236,11 +232,11 @@ function WhatIsNetVent() {
 
         <div className="space-y-6 text-base md:text-lg leading-relaxed" style={{ color: "#4A5568" }}>
           <div ref={p1.ref} style={p1.style}>
-            <p>We design and host academic and co-curricular experiences — ranging from high-energy Model UN conferences to community nights and specialised activities. Every event we put together has one main goal in mind: bringing the right people together.</p>
+            <p>We design and host academic and co-curricular experiences, ranging from high-energy Model UN conferences to community nights and specialised activities. Every event we put together has one main goal in mind: bringing the right people together.</p>
           </div>
 
           <div ref={p2.ref} style={p2.style}>
-            <p>We take traditional gatherings and turn them into spaces where real ideas are shared and conversations actually mean something. Every room we set up is meant to connect what you learn in theory with what you do in the real world — making sure every chat you have could lead to your next big collaboration.</p>
+            <p>We take traditional gatherings and turn them into spaces where real ideas are shared and conversations actually mean something. Every room we set up is meant to connect what you learn in theory with what you do in the real world, making sure every chat you have could lead to your next big collaboration.</p>
           </div>
 
           <div ref={p3.ref} style={p3.style}>
@@ -257,11 +253,11 @@ function WhatIsNetVent() {
 
         <div className="space-y-6 text-base md:text-lg leading-relaxed" style={{ color: "#4A5568" }}>
           <div ref={p4.ref} style={p4.style}>
-            <p>We are building much more than just a platform for events. We are a Parivaar — a youth community that works with the ambition of professionals while supporting each other like a family. At NetVent Parivaar, you never just attend an event and go home. You become part of a network that stays with you.</p>
+            <p>We are building much more than just a platform for events. We are a Parivaar, a youth community that works with the ambition of professionals while supporting each other like a family. At NetVent Parivaar, you never just attend an event and go home. You become part of a network that stays with you.</p>
           </div>
 
           <div ref={p5.ref} style={p5.style}>
-            <p>That means having a group of peers who actually celebrate your wins, help you out through challenges, and push you to reach your full potential. We want to move away from networking that feels forced or transactional. Instead, we focus on building genuine relationships — so that long after the event is over, you still have a community standing right by your side.</p>
+            <p>That means having a group of peers who actually celebrate your wins, help you out through challenges, and push you to reach your full potential. We want to move away from networking that feels forced or transactional. Instead, we focus on building genuine relationships, so that long after the event is over, you still have a community standing right by your side.</p>
           </div>
 
           <div ref={closing.ref} style={{ ...closing.style, textAlign: "center", paddingTop: "24px" }}>
@@ -283,7 +279,6 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
     <div ref={fade.ref} style={fade.style}>
       <div className="group rounded-2xl overflow-hidden transition-all duration-400 hover:-translate-y-2"
         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 32px rgba(0,0,0,0.25)" }}>
-        {/* Portrait photo */}
         <div className="w-full overflow-hidden" style={{ aspectRatio: "4/3", background: "linear-gradient(135deg, #1a3040, #3FA796)" }}>
           {!imgErr ? (
             <img src={photoSrc} alt={name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
@@ -296,7 +291,6 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
             </div>
           )}
         </div>
-        {/* Info */}
         <div className="p-7">
           <h3 className="font-heading font-bold text-2xl text-white mb-1">{name}</h3>
           <p className="text-sm font-semibold mb-5" style={{ color: TEAL }}>{title}</p>
@@ -311,19 +305,15 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
 
 function FoundersDesk() {
   const h = useFadeUp(0);
-  const sub = useFadeUp(100);
 
   return (
     <section className="py-24 px-4" style={{ background: NAVY }}>
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-16">
           <div ref={h.ref} style={h.style}>
-            <h2 className="font-heading font-bold text-white mb-3" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)" }}>
+            <h2 className="font-heading font-bold text-white" style={{ fontSize: "clamp(1.8rem, 4vw, 2.75rem)" }}>
               From the Founders' Desk
             </h2>
-          </div>
-          <div ref={sub.ref} style={sub.style}>
-            <p style={{ color: "rgba(63,167,150,0.8)", fontSize: "1rem" }}>The people behind the Parivaar — and why they built it.</p>
           </div>
         </div>
 
@@ -331,14 +321,14 @@ function FoundersDesk() {
           <FounderCard
             name="Parth Kasat"
             title="Founder"
-            quote="NetVent started with one simple question — what if we stopped waiting for opportunities and started creating them ourselves?"
+            quote="NetVent began with a simple ideology: just as human evolution relied on the building of societies, today's youth need strong communities to come together and create something meaningful. Ultimately, we believe that true power lies in connection and networking."
             photoSrc="/founders/parth.jpg"
             delay={0}
           />
           <FounderCard
             name="Vedant Kasat"
             title="Co-Founder"
-            quote="Every event we've built has taught us the same thing — people are hungry to connect. We just gave them a reason to show up."
+            quote="Every event has taught me one thing: people aren't just looking for certificates or networking. They're looking for genuine connections. That's what we're trying to build with NetVent."
             photoSrc="/founders/vedant.jpg"
             delay={150}
           />
