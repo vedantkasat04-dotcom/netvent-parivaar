@@ -33,10 +33,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-14">
             {/* Brand */}
             <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold font-heading text-xl text-white"
-                  style={{ background: TEAL }}>N</div>
-                <span className="font-heading font-bold text-xl" style={{ color: TEAL }}>NetVent Parivaar</span>
+              <div className="mb-3">
+                <img src="/logo.png" alt="NetVent Parivaar" style={{ height: "56px", width: "auto", objectFit: "contain" }} />
               </div>
               <p className="text-sm mb-5" style={{ color: "rgba(255,255,255,0.45)" }}>
                 Bharat ka apna Parivaar
@@ -45,7 +43,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 className="flex items-center gap-2 text-sm group transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}>
                 <Mail className="w-4 h-4" style={{ color: "rgba(255,255,255,0.35)" }} />
-                <span className="group-hover:text-[#3FA796] transition-colors">hello@netventparivaar.com</span>
+                <span className="group-hover:text-[#3FA796] transition-colors">netventparivaar@gmail.com</span>
               </a>
             </div>
 
