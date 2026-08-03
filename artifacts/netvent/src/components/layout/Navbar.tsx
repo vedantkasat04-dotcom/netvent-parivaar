@@ -40,7 +40,6 @@ export function Navbar() {
   const navShadow = scrolled ? "0 2px 24px rgba(14,27,42,0.10)" : "0 1px 0 rgba(63,167,150,0.10)";
   const navBorder = "1px solid rgba(63,167,150,0.12)";
   const linkColor = NAVY;
-  const logoColor = TEAL;
 
   const initial = user?.name?.charAt(0).toUpperCase() ?? "";
 
@@ -52,12 +51,8 @@ export function Navbar() {
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="h-8 w-8 rounded-full flex items-center justify-center font-bold font-heading text-xl text-white transition-colors"
-              style={{ background: TEAL }}>N</div>
-            <span className="font-heading font-bold text-lg transition-colors" style={{ color: logoColor }}>
-              NetVent Parivaar
-            </span>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <img src="/logo.png" alt="NetVent Parivaar" className="transition-all" style={{ height: "44px", width: "auto", objectFit: "contain" }} />
           </Link>
 
           {/* Desktop nav */}
@@ -125,13 +120,11 @@ export function Navbar() {
 
       {/* Mobile drawer */}
       <div className="fixed inset-0 z-40 md:hidden pointer-events-none">
-        {/* Backdrop */}
         <div
           className="absolute inset-0 transition-opacity duration-300"
           style={{ background: "rgba(14,27,42,0.4)", opacity: mobileOpen ? 1 : 0, pointerEvents: mobileOpen ? "auto" : "none" }}
           onClick={() => setMobileOpen(false)}
         />
-        {/* Drawer */}
         <nav
           className="absolute top-0 right-0 h-full w-72 flex flex-col pt-20 px-6 pb-8 transition-transform duration-300"
           style={{
