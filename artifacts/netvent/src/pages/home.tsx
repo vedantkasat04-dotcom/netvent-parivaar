@@ -18,6 +18,18 @@ const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
 const LIGHT_BLUE = "#EAF4F4";
 
+const SPONSORS = [
+  "Harsha Engineers",
+  "New Edge",
+  "Kangen",
+  "Urban Jungle",
+  "Madhuvan Group",
+  "Decathlon",
+  "Rasna",
+  "Woogom",
+  "Neutron Jeans",
+];
+
 function useFadeUp(delay = 0) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -95,7 +107,6 @@ function HeroSection() {
 
   return (
     <section style={{ background: LIGHT_BLUE }}>
-      {/* Full-bleed photo */}
       <div className="relative w-full overflow-hidden">
         <img
           src={HERO_IMAGES[current].src}
@@ -244,7 +255,6 @@ function WhatIsNetVent() {
           </div>
         </div>
 
-        {/* Welcome to the Parivaar sub-section */}
         <div ref={h2.ref} style={{ ...h2.style, textAlign: "center", marginTop: "72px", marginBottom: "32px" }}>
           <h3 className="font-heading font-bold mb-3" style={{ fontSize: "clamp(1.6rem, 3.5vw, 2.25rem)", color: NAVY }}>
             Welcome to the <em style={{ color: TEAL, fontStyle: "italic" }}>Parivaar</em>
@@ -338,6 +348,55 @@ function FoundersDesk() {
   );
 }
 
+function SponsorsCarousel() {
+  const label = useFadeUp(0);
+  // Duplicate the list so the marquee loops seamlessly
+  const loop = [...SPONSORS, ...SPONSORS];
+
+  return (
+    <section className="py-16" style={{ background: "#F7FBFA", borderTop: "1px solid rgba(63,167,150,0.08)", borderBottom: "1px solid rgba(63,167,150,0.08)" }}>
+      <div className="container mx-auto px-4 mb-8">
+        <div ref={label.ref} style={{ ...label.style, textAlign: "center" }}>
+          <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: TEAL }}>
+            Trusted by
+          </p>
+        </div>
+      </div>
+
+      {/* Marquee */}
+      <div className="relative w-full overflow-hidden" style={{
+        maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
+      }}>
+        <div className="flex items-center gap-16 py-2 marquee-track" style={{ width: "max-content" }}>
+          {loop.map((name, i) => (
+            <div key={`${name}-${i}`} className="flex items-center gap-16 flex-shrink-0">
+              <span className="font-heading font-bold whitespace-nowrap select-none transition-colors"
+                style={{ fontSize: "clamp(1.1rem, 2vw, 1.6rem)", color: "rgba(14,27,42,0.35)", letterSpacing: "0.02em" }}>
+                {name.toUpperCase()}
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: TEAL, opacity: 0.5 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        .marquee-track {
+          animation: marquee-scroll 40s linear infinite;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
+        @keyframes marquee-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 function CTABanner() {
   const fade = useFadeUp(0);
   return (
@@ -378,6 +437,7 @@ export default function Home() {
       <StatsBanner />
       <WhatIsNetVent />
       <FoundersDesk />
+      <SponsorsCarousel />
       <CTABanner />
     </AppLayout>
   );
