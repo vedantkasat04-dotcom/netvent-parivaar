@@ -49,10 +49,15 @@ export function Navbar() {
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{ background: navBg, boxShadow: navShadow, borderBottom: navBorder, backdropFilter: scrolled ? "blur(12px)" : "none" }}
       >
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="container mx-auto flex items-center justify-between px-4" style={{ height: "clamp(64px, 10vw, 76px)" }}>
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0">
-            <img src="/logo.png" alt="NetVent Parivaar" className="transition-all" style={{ height: "44px", width: "auto", objectFit: "contain" }} />
+            <img
+              src="/logo.png"
+              alt="NetVent Parivaar"
+              className="transition-all"
+              style={{ height: "clamp(48px, 8vw, 56px)", width: "auto", objectFit: "contain" }}
+            />
           </Link>
 
           {/* Desktop nav */}
@@ -110,10 +115,10 @@ export function Navbar() {
           </div>
 
           {/* Mobile hamburger */}
-          <button className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl transition-colors"
+          <button className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl transition-colors"
             style={{ color: NAVY }}
             onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </header>
@@ -126,7 +131,7 @@ export function Navbar() {
           onClick={() => setMobileOpen(false)}
         />
         <nav
-          className="absolute top-0 right-0 h-full w-72 flex flex-col pt-20 px-6 pb-8 transition-transform duration-300"
+          className="absolute top-0 right-0 h-full w-72 flex flex-col pt-24 px-6 pb-8 transition-transform duration-300"
           style={{
             background: "#EAF4F4",
             transform: mobileOpen ? "translateX(0)" : "translateX(100%)",
@@ -166,8 +171,8 @@ export function Navbar() {
         </nav>
       </div>
 
-      {/* Spacer for fixed nav */}
-      <div style={{ height: "64px" }} />
+      {/* Spacer for fixed nav (matches header height) */}
+      <div style={{ height: "clamp(64px, 10vw, 76px)" }} />
     </>
   );
 }
