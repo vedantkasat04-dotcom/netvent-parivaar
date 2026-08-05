@@ -24,7 +24,7 @@ const MEDIA: string[] = [
   "gallery-04.jpg",
   "gallery-05.jpg",
   "gallery-06.jpg",
-  "gallery-07.jpg",
+  "gallery-07.mp4",
   "gallery-08.jpg",
   "gallery-09.jpg",
   "gallery-10.jpg",
