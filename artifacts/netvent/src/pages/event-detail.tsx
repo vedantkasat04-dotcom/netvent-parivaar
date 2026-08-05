@@ -8,6 +8,18 @@ import { format } from "date-fns";
 const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
 
+// Safe date formatter — never throws
+function safeFormat(dateStr: string | Date | null | undefined, fmt: string): string | null {
+  if (!dateStr) return null;
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    return format(d, fmt);
+  } catch {
+    return null;
+  }
+}
+
 // Parse the metadata pieces out of the description
 function parseEventMeta(description: string | null | undefined) {
   if (!description) return { count: null as string | null, label: null as string | null, dateRange: null as string | null, sponsors: null as string | null, blurb: null as string | null };
@@ -32,12 +44,10 @@ function parseEventMeta(description: string | null | undefined) {
   const dateRange = datesMatch ? datesMatch[1].trim() : null;
   const sponsors = sponsorsMatch ? sponsorsMatch[1].trim().replace(/\.$/, "") : null;
 
-  // Blurb = everything after the metadata pipes
   let blurb: string | null = null;
   const lastPipeIdx = description.lastIndexOf("|");
   if (lastPipeIdx > -1) {
     const rest = description.slice(lastPipeIdx + 1).trim();
-    // Strip a leading "Sponsors: ...." segment if it slipped in
     const afterSponsorPeriod = rest.match(/\.\s*([A-Z].*)$/s);
     blurb = afterSponsorPeriod ? afterSponsorPeriod[1].trim() : rest;
   } else {
@@ -82,6 +92,7 @@ export default function EventDetail() {
   }
 
   const meta = parseEventMeta(event.description);
+  const fallbackDate = safeFormat(event.eventDate, "MMMM d, yyyy");
 
   return (
     <AppLayout>
@@ -100,10 +111,12 @@ export default function EventDetail() {
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-white/90">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-2 rounded-full text-sm font-medium">
-              <Calendar className="w-4 h-4" />
-              {meta.dateRange || format(new Date(event.eventDate), "MMMM d, yyyy")}
-            </div>
+            {(meta.dateRange || fallbackDate) && (
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-2 rounded-full text-sm font-medium">
+                <Calendar className="w-4 h-4" />
+                {meta.dateRange || fallbackDate}
+              </div>
+            )}
             {event.venue && (
               <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-4 py-2 rounded-full text-sm font-medium">
                 <MapPin className="w-4 h-4" />
