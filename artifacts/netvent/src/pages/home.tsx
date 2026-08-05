@@ -9,9 +9,9 @@ import heroImg2 from "@assets/Screenshot_2026-06-23_at_1.58.28_PM_1782203312315.
 import heroImg3 from "@assets/Screenshot_2026-06-23_at_2.01.09_PM_1782203472868.png";
 
 const HERO_IMAGES = [
-  { src: heroImg1, objectPosition: "50% 20%" },
-  { src: heroImg2, objectPosition: "50% 25%" },
-  { src: heroImg3, objectPosition: "50% 20%" },
+  { src: heroImg1, objectPosition: "50% 30%" },
+  { src: heroImg2, objectPosition: "50% 30%" },
+  { src: heroImg3, objectPosition: "50% 25%" },
 ];
 
 const TEAL = "#3FA796";
@@ -113,7 +113,7 @@ function HeroSection() {
           alt="NetVent community"
           className="w-full block"
           style={{
-            height: "92vh",
+            height: "clamp(62vh, 78vw, 92vh)",
             objectFit: "cover",
             objectPosition: HERO_IMAGES[current].objectPosition,
             background: "#0E1B2A",
@@ -122,16 +122,16 @@ function HeroSection() {
           }}
         />
         <button onClick={prev} aria-label="Previous"
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full transition-all hover:scale-110 focus:outline-none"
-          style={{ background: "rgba(14,27,42,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+          className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-9 h-9 md:w-12 md:h-12 rounded-full transition-all hover:scale-110 focus:outline-none"
+          style={{ background: "rgba(14,27,42,0.5)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <ChevronLeft className="w-5 h-5 text-white" />
         </button>
         <button onClick={next} aria-label="Next"
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full transition-all hover:scale-110 focus:outline-none"
-          style={{ background: "rgba(14,27,42,0.45)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
+          className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-9 h-9 md:w-12 md:h-12 rounded-full transition-all hover:scale-110 focus:outline-none"
+          style={{ background: "rgba(14,27,42,0.5)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.25)" }}>
           <ChevronRight className="w-5 h-5 text-white" />
         </button>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
           {HERO_IMAGES.map((_, i) => (
             <button key={i} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`}
               className="focus:outline-none transition-all duration-300"
@@ -141,8 +141,8 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-14 pb-20 text-center max-w-3xl">
-        <div ref={badge.ref} style={badge.style} className="mb-8 flex justify-center">
+      <div className="container mx-auto px-4 pt-10 md:pt-14 pb-16 md:pb-20 text-center max-w-3xl">
+        <div ref={badge.ref} style={badge.style} className="mb-6 md:mb-8 flex justify-center">
           <span className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold"
             style={{ background: "rgba(255,255,255,0.9)", color: TEAL, border: `1.5px solid rgba(63,167,150,0.3)`, boxShadow: "0 2px 12px rgba(63,167,150,0.12)" }}>
             <span className="relative flex h-2.5 w-2.5">
@@ -154,7 +154,7 @@ function HeroSection() {
         </div>
 
         <div ref={headline.ref} style={headline.style}>
-          <h1 className="font-heading font-bold leading-tight mb-10" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: NAVY }}>
+          <h1 className="font-heading font-bold leading-tight mb-8 md:mb-10" style={{ fontSize: "clamp(1.75rem, 5vw, 3.5rem)", color: NAVY }}>
             Where Bharat's Youth Interact to<br />Connect, Collaborate, and Lead.
           </h1>
         </div>
@@ -350,7 +350,6 @@ function FoundersDesk() {
 
 function SponsorsCarousel() {
   const label = useFadeUp(0);
-  // Duplicate the list so the marquee loops seamlessly
   const loop = [...SPONSORS, ...SPONSORS];
 
   return (
@@ -363,7 +362,6 @@ function SponsorsCarousel() {
         </div>
       </div>
 
-      {/* Marquee */}
       <div className="relative w-full overflow-hidden" style={{
         maskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
