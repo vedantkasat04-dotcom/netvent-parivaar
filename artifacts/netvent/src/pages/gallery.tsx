@@ -1,20 +1,129 @@
 import { useState, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play } from "lucide-react";
 
 const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
 const LIGHT_BLUE = "#EAF4F4";
 
-// Add more photos here as you upload them: gallery-07.jpg, gallery-08.jpg, etc.
-const PHOTOS = [
-  "/gallery/gallery-01.jpg",
-  "/gallery/gallery-02.jpg",
-  "/gallery/gallery-03.jpg",
-  "/gallery/gallery-04.jpg",
-  "/gallery/gallery-05.jpg",
-  "/gallery/gallery-06.jpg",
+// -----------------------------------------------------------------------------
+// MEDIA LIST — Just list the filenames as you upload them. The gallery
+// auto-detects photos vs. videos from the file extension.
+//
+// Currently uploaded: gallery-01.jpg to gallery-06.jpg
+// Slots 07–20 are placeholders — they'll appear automatically as soon as you
+// upload the actual file with that exact name (jpg / jpeg / png / webp / mp4).
+//
+// To swap one of these with a video, just change the extension to .mp4:
+//   e.g. "gallery-07.mp4"  →  will render as an autoplaying video tile.
+// -----------------------------------------------------------------------------
+const MEDIA: string[] = [
+  "gallery-01.jpg",
+  "gallery-02.jpg",
+  "gallery-03.jpg",
+  "gallery-04.jpg",
+  "gallery-05.jpg",
+  "gallery-06.jpg",
+  "gallery-07.jpg",
+  "gallery-08.jpg",
+  "gallery-09.jpg",
+  "gallery-10.jpg",
+  "gallery-11.jpg",
+  "gallery-12.jpg",
+  "gallery-13.jpg",
+  "gallery-14.jpg",
+  "gallery-15.jpg",
+  "gallery-16.jpg",
+  "gallery-17.jpg",
+  "gallery-18.jpg",
+  "gallery-19.jpg",
+  "gallery-20.jpg",
 ];
+
+const isVideo = (file: string) => /\.(mp4|mov|webm)$/i.test(file);
+
+// -----------------------------------------------------------------------------
+// Tile: a single photo or video card. If the file doesn't exist on the server,
+// the tile hides itself (no broken icons).
+// -----------------------------------------------------------------------------
+function MediaTile({
+  file,
+  onOpen,
+  animationDelay,
+}: {
+  file: string;
+  onOpen: () => void;
+  animationDelay: number;
+}) {
+  const [failed, setFailed] = useState(false);
+  const video = isVideo(file);
+  const src = `/gallery/${file}`;
+
+  if (failed) return null;
+
+  return (
+    <button
+      onClick={onOpen}
+      className="group relative w-full overflow-hidden rounded-2xl cursor-pointer focus:outline-none block gallery-tile mb-4 md:mb-5"
+      style={{
+        background: "#e0eeed",
+        border: "1px solid rgba(63,167,150,0.15)",
+        boxShadow: "0 2px 12px rgba(14,27,42,0.06)",
+        animation: `gallery-fade-in 0.6s ease ${animationDelay}ms both`,
+        breakInside: "avoid",
+        WebkitColumnBreakInside: "avoid",
+      }}
+      aria-label="Open media"
+    >
+      {video ? (
+        <video
+          src={src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="w-full h-auto block transition-transform duration-500 ease-out group-hover:scale-105"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="w-full h-auto block transition-transform duration-500 ease-out group-hover:scale-105"
+          onError={() => setFailed(true)}
+        />
+      )}
+
+      {/* Play badge on videos */}
+      {video && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-70 group-hover:opacity-100 transition-opacity"
+        >
+          <div
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 56,
+              height: 56,
+              background: "rgba(14,27,42,0.55)",
+              backdropFilter: "blur(6px)",
+              border: "1.5px solid rgba(255,255,255,0.4)",
+            }}
+          >
+            <Play className="w-5 h-5 text-white" style={{ marginLeft: 3 }} fill="currentColor" />
+          </div>
+        </div>
+      )}
+
+      {/* Subtle wash on hover */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{ background: "linear-gradient(to top, rgba(14,27,42,0.15), transparent 60%)" }}
+      />
+    </button>
+  );
+}
 
 export default function Gallery() {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
@@ -22,13 +131,13 @@ export default function Gallery() {
   const open = useCallback((i: number) => setLightboxIdx(i), []);
   const close = useCallback(() => setLightboxIdx(null), []);
   const next = useCallback(() => {
-    setLightboxIdx((idx) => (idx === null ? null : (idx + 1) % PHOTOS.length));
+    setLightboxIdx((idx) => (idx === null ? null : (idx + 1) % MEDIA.length));
   }, []);
   const prev = useCallback(() => {
-    setLightboxIdx((idx) => (idx === null ? null : (idx - 1 + PHOTOS.length) % PHOTOS.length));
+    setLightboxIdx((idx) => (idx === null ? null : (idx - 1 + MEDIA.length) % MEDIA.length));
   }, []);
 
-  // Keyboard support for lightbox
+  // Keyboard + body scroll lock
   useEffect(() => {
     if (lightboxIdx === null) return;
     const handler = (e: KeyboardEvent) => {
@@ -37,7 +146,6 @@ export default function Gallery() {
       else if (e.key === "ArrowLeft") prev();
     };
     window.addEventListener("keydown", handler);
-    // Lock body scroll while lightbox is open
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -45,6 +153,9 @@ export default function Gallery() {
       document.body.style.overflow = prevOverflow;
     };
   }, [lightboxIdx, close, next, prev]);
+
+  const activeFile = lightboxIdx !== null ? MEDIA[lightboxIdx] : null;
+  const activeIsVideo = activeFile ? isVideo(activeFile) : false;
 
   return (
     <AppLayout>
@@ -61,40 +172,21 @@ export default function Gallery() {
         </p>
       </div>
 
-      {/* Grid */}
+      {/* Masonry Grid */}
       <section className="py-14 md:py-16 px-4" style={{ background: LIGHT_BLUE }}>
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {PHOTOS.map((src, i) => (
-              <button
-                key={src}
-                onClick={() => open(i)}
-                className="group relative overflow-hidden rounded-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 gallery-tile"
-                style={{
-                  aspectRatio: "1 / 1",
-                  background: "#e0eeed",
-                  border: "1px solid rgba(63,167,150,0.15)",
-                  boxShadow: "0 2px 12px rgba(14,27,42,0.06)",
-                  animation: `gallery-fade-in 0.6s ease ${i * 80}ms both`,
-                }}
-                aria-label={`Open photo ${i + 1}`}
-              >
-                <img
-                  src={src}
-                  alt=""
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                />
-                {/* Subtle overlay wash on hover */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ background: "linear-gradient(to top, rgba(14,27,42,0.15), transparent 60%)" }}
-                />
-              </button>
+          <div className="gallery-masonry">
+            {MEDIA.map((file, i) => (
+              <MediaTile
+                key={file}
+                file={file}
+                onOpen={() => open(i)}
+                animationDelay={i * 60}
+              />
             ))}
           </div>
 
-          {/* Coming soon block */}
+          {/* Follow us block */}
           <div
             className="mt-14 text-center rounded-2xl py-10 px-6"
             style={{ background: "rgba(63,167,150,0.06)", border: `1.5px dashed rgba(63,167,150,0.3)` }}
@@ -120,7 +212,7 @@ export default function Gallery() {
       </section>
 
       {/* Lightbox */}
-      {lightboxIdx !== null && (
+      {lightboxIdx !== null && activeFile && (
         <div
           role="dialog"
           aria-modal="true"
@@ -212,22 +304,44 @@ export default function Gallery() {
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          {/* Image */}
-          <img
-            src={PHOTOS[lightboxIdx]}
-            alt=""
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: "min(1100px, 92vw)",
-              maxHeight: "86vh",
-              width: "auto",
-              height: "auto",
-              objectFit: "contain",
-              borderRadius: "8px",
-              boxShadow: "0 30px 90px rgba(0,0,0,0.5)",
-              animation: "gallery-lightbox-zoom 0.35s ease",
-            }}
-          />
+          {/* Media */}
+          <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: "min(1100px, 92vw)", maxHeight: "86vh" }}>
+            {activeIsVideo ? (
+              <video
+                key={activeFile}
+                src={`/gallery/${activeFile}`}
+                controls
+                autoPlay
+                playsInline
+                style={{
+                  maxWidth: "min(1100px, 92vw)",
+                  maxHeight: "86vh",
+                  width: "auto",
+                  height: "auto",
+                  borderRadius: "8px",
+                  boxShadow: "0 30px 90px rgba(0,0,0,0.5)",
+                  background: "#000",
+                  animation: "gallery-lightbox-zoom 0.35s ease",
+                }}
+              />
+            ) : (
+              <img
+                key={activeFile}
+                src={`/gallery/${activeFile}`}
+                alt=""
+                style={{
+                  maxWidth: "min(1100px, 92vw)",
+                  maxHeight: "86vh",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                  boxShadow: "0 30px 90px rgba(0,0,0,0.5)",
+                  animation: "gallery-lightbox-zoom 0.35s ease",
+                }}
+              />
+            )}
+          </div>
 
           {/* Counter */}
           <div
@@ -242,12 +356,28 @@ export default function Gallery() {
               letterSpacing: "0.08em",
             }}
           >
-            {lightboxIdx + 1} / {PHOTOS.length}
+            {lightboxIdx + 1} / {MEDIA.length}
           </div>
         </div>
       )}
 
       <style>{`
+        .gallery-masonry {
+          column-count: 1;
+          column-gap: 1rem;
+        }
+        @media (min-width: 640px) {
+          .gallery-masonry {
+            column-count: 2;
+            column-gap: 1rem;
+          }
+        }
+        @media (min-width: 1024px) {
+          .gallery-masonry {
+            column-count: 3;
+            column-gap: 1.25rem;
+          }
+        }
         @keyframes gallery-fade-in {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
