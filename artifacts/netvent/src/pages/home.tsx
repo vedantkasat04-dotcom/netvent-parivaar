@@ -4,14 +4,15 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, Heart, Calendar, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
-import heroImg1 from "@assets/Screenshot_2026-06-23_at_12.41.51_PM_1782198733607.png";
-import heroImg2 from "@assets/Screenshot_2026-06-23_at_1.58.28_PM_1782203312315.png";
-import heroImg3 from "@assets/Screenshot_2026-06-23_at_2.01.09_PM_1782203472868.png";
-
+// -----------------------------------------------------------------------------
+// HERO IMAGES — pointing to gallery photos in /public/gallery/
+// To change hero photos: upload naye photos to public/hero/ folder
+// and change the paths below (e.g. "/hero/hero-1.jpg")
+// -----------------------------------------------------------------------------
 const HERO_IMAGES = [
-  { src: heroImg1, objectPosition: "50% 30%" },
-  { src: heroImg2, objectPosition: "50% 30%" },
-  { src: heroImg3, objectPosition: "50% 25%" },
+  { src: "/gallery/gallery-01.jpg", objectPosition: "50% 30%" },
+  { src: "/gallery/gallery-02.jpg", objectPosition: "50% 30%" },
+  { src: "/gallery/gallery-03.jpg", objectPosition: "50% 25%" },
 ];
 
 const TEAL = "#3FA796";
