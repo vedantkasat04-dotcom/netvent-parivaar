@@ -36,7 +36,7 @@ const signupSchema = z.object({
   schoolClass: z.string().optional(),
   degreeLevel: z.string().optional(),
   collegeYear: z.string().optional(),
-  expertiseIds: z.array(z.string()).max(3, { message: "Select up to 3 skills." }),
+  expertiseIds: z.array(z.string()).max(3, { message: "Select up to 3 skills." }).optional().default([]),
 }).superRefine((data, ctx) => {
   if (!data.schoolOrCollegeName || data.schoolOrCollegeName.trim().length < 2) {
     ctx.addIssue({ code: "custom", path: ["schoolOrCollegeName"], message: "Please enter your institution name." });
@@ -90,7 +90,7 @@ export default function Signup() {
         schoolClass: isSchool ? data.schoolClass || null : null,
         degreeLevel: isSchool ? null : (data.degreeLevel as SignupInputDegreeLevel) || null,
         collegeYear: isSchool ? null : data.collegeYear || null,
-        expertiseIds: data.expertiseIds,
+        expertiseIds: data.expertiseIds ?? [],
       },
     }, {
       onSuccess: async () => {
@@ -262,14 +262,14 @@ export default function Signup() {
                   )}
                 </div>
 
-                {/* Skills */}
+                {/* Skills — optional */}
                 <div className="space-y-5 pt-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Skills &amp; Expertise</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Skills &amp; Expertise <span className="normal-case font-normal text-muted-foreground">(optional)</span></h3>
                   <FormField control={form.control} name="expertiseIds" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-medium">Your top skills <span className="text-muted-foreground font-normal">(up to 3)</span></FormLabel>
                       <FormControl>
-                        <ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value} onChange={field.onChange} max={3} />
+                        <ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value ?? []} onChange={field.onChange} max={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
