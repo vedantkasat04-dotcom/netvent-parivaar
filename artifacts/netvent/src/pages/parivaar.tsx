@@ -99,21 +99,6 @@ export default function Parivaar() {
       {/* Members grid */}
       <section className="py-14 px-4" style={{ background: LIGHT_BLUE }}>
         <div className="container mx-auto max-w-5xl">
-          {!isAuthenticated && (
-            <div className="rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4"
-              style={{ background: "rgba(63,167,150,0.07)", border: `1.5px solid rgba(63,167,150,0.2)` }}>
-              <div>
-                <h3 className="font-heading font-bold text-lg mb-1" style={{ color: NAVY }}>Want to connect?</h3>
-                <p className="text-sm" style={{ color: "#4A5568" }}>Log in or create an account to view members' contact details.</p>
-              </div>
-              <Link href="/signup">
-                <Button className="rounded-full font-semibold text-white px-6 flex-shrink-0" style={{ background: TEAL, border: "none" }}>
-                  Join the Parivaar
-                </Button>
-              </Link>
-            </div>
-          )}
-
           {isLoading ? (
             <div className="py-20 text-center" style={{ color: "#4A5568" }}>Loading members…</div>
           ) : membersData?.data && membersData.data.length > 0 ? (
@@ -131,6 +116,7 @@ export default function Parivaar() {
                       opacity: unavailable ? 0.75 : 1,
                     }}>
                     <CardContent className="p-5">
+                      {/* Avatar + Name + City */}
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0"
                           style={{ border: `2px solid rgba(63,167,150,0.2)` }}>
@@ -155,6 +141,7 @@ export default function Parivaar() {
                         </div>
                       </div>
 
+                      {/* Skills — always visible */}
                       {member.expertise && member.expertise.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-4">
                           {member.expertise.slice(0, 3).map(skill => (
@@ -166,8 +153,9 @@ export default function Parivaar() {
                         </div>
                       )}
 
-                      {/* Contact — gated by login */}
+                      {/* Contact section */}
                       {isAuthenticated ? (
+                        /* Logged in — show full contact */
                         <div className="space-y-1.5 mb-4 text-sm" style={{ color: "#4A5568" }}>
                           {member.email && (
                             <div className="flex items-center gap-2 truncate">
@@ -183,10 +171,34 @@ export default function Parivaar() {
                           )}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 mb-4 text-xs px-3 py-2 rounded-lg"
-                          style={{ background: "rgba(74,85,104,0.06)", color: "rgba(74,85,104,0.8)" }}>
-                          <Lock className="w-3.5 h-3.5 flex-shrink-0" />
-                          <Link href="/login" className="hover:underline font-medium">Log in to view contact</Link>
+                        /* Logged out — blurred contact with signup CTA */
+                        <div className="relative mb-4 rounded-xl overflow-hidden">
+                          {/* Blurred fake contact */}
+                          <div className="space-y-1.5 text-sm p-3" style={{
+                            color: "#4A5568",
+                            filter: "blur(5px)",
+                            userSelect: "none",
+                            pointerEvents: "none",
+                          }}>
+                            <div className="flex items-center gap-2">
+                              <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: TEAL }} />
+                              <span>member@email.com</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: TEAL }} />
+                              <span>+91 98765 43210</span>
+                            </div>
+                          </div>
+                          {/* Overlay */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl"
+                            style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(2px)" }}>
+                            <Lock className="w-4 h-4 mb-1" style={{ color: TEAL }} />
+                            <Link href="/signup">
+                              <span className="text-xs font-semibold hover:underline cursor-pointer" style={{ color: TEAL }}>
+                                Sign up to see details
+                              </span>
+                            </Link>
+                          </div>
                         </div>
                       )}
 
