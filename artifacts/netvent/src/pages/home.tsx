@@ -10,9 +10,9 @@ import { Users, MapPin, Heart, Calendar, ArrowRight, ChevronLeft, ChevronRight }
 // and change the paths below (e.g. "/hero/hero-1.jpg")
 // -----------------------------------------------------------------------------
 const HERO_IMAGES = [
-  { src: "/gallery/gallery-01.jpg", objectPosition: "50% 30%" },
-  { src: "/gallery/gallery-02.jpg", objectPosition: "50% 30%" },
-  { src: "/gallery/gallery-03.jpg", objectPosition: "50% 25%" },
+  { src: "/gallery/gallery-01.jpg", objectPosition: "50% 75%" },
+  { src: "/gallery/gallery-02.jpg", objectPosition: "50% 75%" },
+  { src: "/gallery/gallery-03.jpg", objectPosition: "50% 75%" },
 ];
 
 const TEAL = "#3FA796";
