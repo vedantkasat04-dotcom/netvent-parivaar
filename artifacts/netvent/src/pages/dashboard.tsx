@@ -22,7 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CityCombobox } from "@/components/CityCombobox";
 import { ExpertiseMultiSelect } from "@/components/ExpertiseMultiSelect";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, GraduationCap, Pencil, Mail, Phone } from "lucide-react";
+import { MapPin, GraduationCap, Pencil, Mail, Phone, Camera } from "lucide-react";
 
 const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
@@ -42,7 +42,9 @@ const profileSchema = z.object({
   collegeYear: z.string().optional(),
   bio: z.string().max(500, { message: "Bio must be under 500 characters." }).optional(),
   avatarUrl: z.string().url({ message: "Enter a valid URL." }).optional().or(z.literal("")),
-  expertiseIds: z.array(z.string()).max(3, { message: "Select up to 3 skills." }),
+  expertiseIds: z.array(z.string())
+    .min(1, { message: "Select at least 1 skill." })
+    .max(6, { message: "Select up to 6 skills." }),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -80,6 +82,7 @@ export default function Dashboard() {
   });
 
   const educationType = form.watch("educationType");
+  const avatarUrlWatch = form.watch("avatarUrl");
 
   const onSubmit = (data: ProfileFormValues) => {
     const isSchool = data.educationType === UpdateProfileInputEducationType.SCHOOL;
@@ -147,15 +150,27 @@ export default function Dashboard() {
               <div className="h-24" style={{ background: `linear-gradient(120deg, ${TEAL}, #2d8576)` }} />
               <CardContent className="p-6 -mt-12">
                 <div className="flex items-end justify-between mb-4">
-                  <div className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-muted">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl font-bold font-heading" style={{ background: "rgba(63,167,150,0.15)", color: TEAL }}>
-                        {user.name.charAt(0)}
-                      </div>
-                    )}
+                  <div className="relative w-24 h-24">
+                    <div className="w-24 h-24 rounded-full border-4 border-white shadow-md overflow-hidden bg-muted">
+                      {user.avatarUrl ? (
+                        <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-3xl font-bold font-heading" style={{ background: "rgba(63,167,150,0.15)", color: TEAL }}>
+                          {user.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    {/* Camera icon — opens edit dialog */}
+                    <button
+                      onClick={() => setEditOpen(true)}
+                      className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                      style={{ background: TEAL, border: "2px solid white" }}
+                      title="Change photo"
+                    >
+                      <Camera className="w-4 h-4 text-white" />
+                    </button>
                   </div>
+
                   <Dialog open={editOpen} onOpenChange={setEditOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="rounded-full gap-2" style={{ borderColor: TEAL, color: TEAL }}>
@@ -190,9 +205,35 @@ export default function Dashboard() {
                           <FormField control={form.control} name="city" render={({ field }) => (
                             <FormItem><FormLabel>City</FormLabel><FormControl><CityCombobox value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
                           )} />
+
+                          {/* Photo URL field with preview */}
                           <FormField control={form.control} name="avatarUrl" render={({ field }) => (
-                            <FormItem><FormLabel>Avatar URL <span className="text-muted-foreground font-normal">(optional)</span></FormLabel><FormControl><Input placeholder="https://…" {...field} value={field.value ?? ""} className="h-11" /></FormControl><FormMessage /></FormItem>
+                            <FormItem>
+                              <FormLabel>Profile Photo <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                              <div className="flex items-center gap-3">
+                                {/* Preview */}
+                                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-border"
+                                  style={{ background: "rgba(63,167,150,0.1)" }}>
+                                  {avatarUrlWatch ? (
+                                    <img src={avatarUrlWatch} alt="Preview" className="w-full h-full object-cover"
+                                      onError={(e) => (e.currentTarget.style.display = "none")} />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <Camera className="w-5 h-5" style={{ color: TEAL, opacity: 0.5 }} />
+                                    </div>
+                                  )}
+                                </div>
+                                <FormControl>
+                                  <Input placeholder="Paste image URL (e.g. from Google Photos, ImgBB…)" {...field} value={field.value ?? ""} className="h-11 flex-1" />
+                                </FormControl>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Upload your photo to <a href="https://imgbb.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: TEAL }}>imgbb.com</a> (free) → copy link → paste here.
+                              </p>
+                              <FormMessage />
+                            </FormItem>
                           )} />
+
                           <FormField control={form.control} name="bio" render={({ field }) => (
                             <FormItem><FormLabel>Bio <span className="text-muted-foreground font-normal">(optional)</span></FormLabel><FormControl><Textarea placeholder="Tell the Parivaar about yourself…" {...field} value={field.value ?? ""} rows={3} /></FormControl><FormMessage /></FormItem>
                           )} />
@@ -258,8 +299,8 @@ export default function Dashboard() {
 
                           <FormField control={form.control} name="expertiseIds" render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Skills <span className="text-muted-foreground font-normal">(up to 3)</span></FormLabel>
-                              <FormControl><ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value} onChange={field.onChange} max={3} /></FormControl>
+                              <FormLabel>Skills <span className="text-muted-foreground font-normal">(1 to 6)</span></FormLabel>
+                              <FormControl><ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value} onChange={field.onChange} max={6} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )} />
