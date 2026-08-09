@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import Cropper, { Area } from "react-easy-crop";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -22,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CityCombobox } from "@/components/CityCombobox";
 import { ExpertiseMultiSelect } from "@/components/ExpertiseMultiSelect";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, GraduationCap, Pencil, Mail, Phone, Camera, Upload, Loader2 } from "lucide-react";
+import { MapPin, GraduationCap, Pencil, Mail, Phone, Camera, Upload, Loader2, ZoomIn, ZoomOut } from "lucide-react";
 
 const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
@@ -54,8 +55,8 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-// Cloudinary upload helper — returns secure_url on success
-async function uploadToCloudinary(file: File): Promise<string> {
+// Cloudinary upload helper — accepts Blob or File, returns secure_url
+async function uploadToCloudinary(file: Blob | File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
@@ -75,13 +76,64 @@ async function uploadToCloudinary(file: File): Promise<string> {
   return data.secure_url as string;
 }
 
+// Read file as data URL (needed for cropper preview)
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Generate cropped image blob from source + crop area
+async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.src = imageSrc;
+  await new Promise((res, rej) => {
+    image.onload = res;
+    image.onerror = rej;
+  });
+
+  // Output size — max 512x512 for reasonable file size, good enough for avatars
+  const outputSize = Math.min(512, pixelCrop.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = outputSize;
+  canvas.height = outputSize;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas context not available");
+
+  ctx.drawImage(
+    image,
+    pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
+    0, 0, outputSize, outputSize
+  );
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Canvas is empty"))),
+      "image/jpeg",
+      0.92
+    );
+  });
+}
+
 export default function Dashboard() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [editOpen, setEditOpen] = useState(false);
   const [available, setAvailable] = useState(user?.isAvailable ?? true);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [uploadingDialogAvatar, setUploadingDialogAvatar] = useState(false);
+
+  // Cropper state
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperImage, setCropperImage] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  // Where should the uploaded URL land: "profile" saves to backend immediately, "form" updates form field only
+  const [cropperTarget, setCropperTarget] = useState<"profile" | "form">("profile");
 
   // Hidden file input refs
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
@@ -116,15 +168,18 @@ export default function Dashboard() {
   const educationType = form.watch("educationType");
   const avatarUrlWatch = form.watch("avatarUrl");
 
-  // Validate file before upload
+  // Validate file
   const validateFile = (file: File): string | null => {
     if (!file.type.startsWith("image/")) return "Please select an image file (JPG, PNG, WebP).";
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) return `File too large. Max ${MAX_FILE_SIZE_MB}MB allowed.`;
     return null;
   };
 
-  // Direct upload from camera icon on profile — uploads AND saves to backend
-  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // File selected → open cropper
+  const handleFileSelected = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    target: "profile" | "form"
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -135,37 +190,70 @@ export default function Dashboard() {
       return;
     }
 
+    try {
+      const dataUrl = await readFileAsDataURL(file);
+      setCropperImage(dataUrl);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCropperTarget(target);
+      setCropperOpen(true);
+    } catch (err) {
+      toast({ title: "Could not read file", description: "Please try again.", variant: "destructive" });
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels);
+  }, []);
+
+  // Save profile avatar directly to backend
+  const saveAvatarToBackend = async (secureUrl: string) => {
+    if (!user) throw new Error("Not logged in");
+    const isSchool = user.educationType === "SCHOOL";
+    await new Promise<void>((resolve, reject) => {
+      updateMutation.mutate({
+        data: {
+          name: user.name,
+          email: user.email,
+          phone: user.phone ?? "",
+          city: user.city ?? "",
+          educationType: user.educationType as UpdateProfileInputEducationType,
+          schoolOrCollegeName: user.schoolOrCollegeName ?? "",
+          schoolClass: isSchool ? user.schoolClass ?? null : null,
+          degreeLevel: isSchool ? null : (user.degreeLevel as UpdateProfileInputDegreeLevel) ?? null,
+          collegeYear: isSchool ? null : user.collegeYear ?? null,
+          bio: user.bio ?? null,
+          avatarUrl: secureUrl,
+          expertiseIds: user.expertise?.map(ex => ex.id) ?? [],
+        },
+      }, {
+        onSuccess: () => resolve(),
+        onError: (err) => reject(err),
+      });
+    });
+    await refreshUser();
+  };
+
+  // Confirm crop → upload → save
+  const handleCropConfirm = async () => {
+    if (!cropperImage || !croppedAreaPixels) return;
     setUploadingAvatar(true);
     try {
-      const secureUrl = await uploadToCloudinary(file);
+      const blob = await getCroppedBlob(cropperImage, croppedAreaPixels);
+      const secureUrl = await uploadToCloudinary(blob);
 
-      // Save to backend — only update avatarUrl, keep everything else as-is
-      if (!user) throw new Error("Not logged in");
-      const isSchool = user.educationType === "SCHOOL";
-      await new Promise<void>((resolve, reject) => {
-        updateMutation.mutate({
-          data: {
-            name: user.name,
-            email: user.email,
-            phone: user.phone ?? "",
-            city: user.city ?? "",
-            educationType: user.educationType as UpdateProfileInputEducationType,
-            schoolOrCollegeName: user.schoolOrCollegeName ?? "",
-            schoolClass: isSchool ? user.schoolClass ?? null : null,
-            degreeLevel: isSchool ? null : (user.degreeLevel as UpdateProfileInputDegreeLevel) ?? null,
-            collegeYear: isSchool ? null : user.collegeYear ?? null,
-            bio: user.bio ?? null,
-            avatarUrl: secureUrl,
-            expertiseIds: user.expertise?.map(ex => ex.id) ?? [],
-          },
-        }, {
-          onSuccess: () => resolve(),
-          onError: (err) => reject(err),
-        });
-      });
+      if (cropperTarget === "profile") {
+        await saveAvatarToBackend(secureUrl);
+        toast({ title: "Photo updated", description: "Your new profile photo is live." });
+      } else {
+        form.setValue("avatarUrl", secureUrl, { shouldValidate: true, shouldDirty: true });
+        toast({ title: "Photo uploaded", description: "Click 'Save changes' to apply." });
+      }
 
-      await refreshUser();
-      toast({ title: "Photo updated", description: "Your new profile photo is live." });
+      setCropperOpen(false);
+      setCropperImage(null);
     } catch (err: any) {
       toast({
         title: "Upload failed",
@@ -174,37 +262,14 @@ export default function Dashboard() {
       });
     } finally {
       setUploadingAvatar(false);
-      e.target.value = "";
     }
   };
 
-  // Upload from within edit dialog — only updates form field, saves on dialog submit
-  const handleDialogAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const validationError = validateFile(file);
-    if (validationError) {
-      toast({ title: "Invalid file", description: validationError, variant: "destructive" });
-      e.target.value = "";
-      return;
-    }
-
-    setUploadingDialogAvatar(true);
-    try {
-      const secureUrl = await uploadToCloudinary(file);
-      form.setValue("avatarUrl", secureUrl, { shouldValidate: true, shouldDirty: true });
-      toast({ title: "Photo uploaded", description: "Click 'Save changes' to apply." });
-    } catch (err: any) {
-      toast({
-        title: "Upload failed",
-        description: err?.message || "Could not upload photo. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingDialogAvatar(false);
-      e.target.value = "";
-    }
+  const handleCropCancel = () => {
+    setCropperOpen(false);
+    setCropperImage(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
   };
 
   const onSubmit = (data: ProfileFormValues) => {
@@ -266,14 +331,76 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-10 max-w-5xl">
         <h1 className="font-heading text-3xl font-bold mb-8" style={{ color: NAVY }}>My Parivaar</h1>
 
-        {/* Hidden file input for direct camera-icon upload */}
+        {/* Hidden file inputs */}
         <input
           ref={avatarFileInputRef}
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={handleAvatarFileChange}
+          onChange={(e) => handleFileSelected(e, "profile")}
         />
+
+        {/* Cropper Dialog — WhatsApp-style */}
+        <Dialog open={cropperOpen} onOpenChange={(open) => !open && !uploadingAvatar && handleCropCancel()}>
+          <DialogContent className="max-w-md p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-2">
+              <DialogTitle>Adjust your photo</DialogTitle>
+              <DialogDescription>Drag to reposition · Pinch or use slider to zoom</DialogDescription>
+            </DialogHeader>
+
+            {/* Cropper area — square canvas with round crop mask */}
+            <div className="relative w-full h-[320px] bg-black">
+              {cropperImage && (
+                <Cropper
+                  image={cropperImage}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  cropShape="round"
+                  showGrid={false}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              )}
+            </div>
+
+            {/* Zoom slider */}
+            <div className="px-6 py-4 flex items-center gap-3 bg-muted/30">
+              <ZoomOut className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="flex-1 accent-current"
+                style={{ accentColor: TEAL }}
+                disabled={uploadingAvatar}
+              />
+              <ZoomIn className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
+            </div>
+
+            <DialogFooter className="p-4 pt-2 gap-2">
+              <Button variant="outline" onClick={handleCropCancel} disabled={uploadingAvatar}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCropConfirm}
+                disabled={uploadingAvatar || !croppedAreaPixels}
+                className="gap-2 font-semibold"
+                style={{ background: TEAL }}
+              >
+                {uploadingAvatar ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
+                ) : (
+                  <>Save photo</>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile card */}
@@ -291,14 +418,12 @@ export default function Dashboard() {
                           {user.name.charAt(0)}
                         </div>
                       )}
-                      {/* Loading overlay during upload */}
-                      {uploadingAvatar && (
+                      {uploadingAvatar && !cropperOpen && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
                           <Loader2 className="w-6 h-6 text-white animate-spin" />
                         </div>
                       )}
                     </div>
-                    {/* Camera icon — opens file picker directly */}
                     <button
                       onClick={() => !uploadingAvatar && avatarFileInputRef.current?.click()}
                       disabled={uploadingAvatar}
@@ -326,13 +451,12 @@ export default function Dashboard() {
                         <DialogDescription>Update your details. Changes appear in the directory.</DialogDescription>
                       </DialogHeader>
 
-                      {/* Hidden file input for dialog upload */}
                       <input
                         ref={dialogFileInputRef}
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={handleDialogAvatarFileChange}
+                        onChange={(e) => handleFileSelected(e, "form")}
                       />
 
                       <Form {...form}>
@@ -359,12 +483,11 @@ export default function Dashboard() {
                             <FormItem><FormLabel>City</FormLabel><FormControl><CityCombobox value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
                           )} />
 
-                          {/* Photo upload field — click to upload, no URL paste */}
+                          {/* Photo upload — opens cropper */}
                           <FormField control={form.control} name="avatarUrl" render={() => (
                             <FormItem>
                               <FormLabel>Profile Photo <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                               <div className="flex items-center gap-3">
-                                {/* Preview */}
                                 <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border border-border relative"
                                   style={{ background: "rgba(63,167,150,0.1)" }}>
                                   {avatarUrlWatch ? (
@@ -375,28 +498,19 @@ export default function Dashboard() {
                                       <Camera className="w-6 h-6" style={{ color: TEAL, opacity: 0.5 }} />
                                     </div>
                                   )}
-                                  {uploadingDialogAvatar && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                                      <Loader2 className="w-5 h-5 text-white animate-spin" />
-                                    </div>
-                                  )}
                                 </div>
                                 <div className="flex-1 flex flex-col gap-2">
                                   <Button
                                     type="button"
                                     variant="outline"
-                                    disabled={uploadingDialogAvatar}
+                                    disabled={uploadingAvatar}
                                     onClick={() => dialogFileInputRef.current?.click()}
                                     className="gap-2 w-full"
                                     style={{ borderColor: TEAL, color: TEAL }}
                                   >
-                                    {uploadingDialogAvatar ? (
-                                      <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
-                                    ) : (
-                                      <><Upload className="w-4 h-4" /> {avatarUrlWatch ? "Change Photo" : "Upload Photo"}</>
-                                    )}
+                                    <Upload className="w-4 h-4" /> {avatarUrlWatch ? "Change Photo" : "Upload Photo"}
                                   </Button>
-                                  {avatarUrlWatch && !uploadingDialogAvatar && (
+                                  {avatarUrlWatch && (
                                     <button
                                       type="button"
                                       onClick={() => form.setValue("avatarUrl", "", { shouldDirty: true })}
@@ -408,7 +522,7 @@ export default function Dashboard() {
                                 </div>
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">
-                                JPG, PNG, or WebP · Max {MAX_FILE_SIZE_MB}MB
+                                JPG, PNG, or WebP · Max {MAX_FILE_SIZE_MB}MB · You can crop and zoom
                               </p>
                               <FormMessage />
                             </FormItem>
@@ -486,7 +600,7 @@ export default function Dashboard() {
                           )} />
 
                           <DialogFooter>
-                            <Button type="submit" disabled={updateMutation.isPending || uploadingDialogAvatar} className="font-semibold">
+                            <Button type="submit" disabled={updateMutation.isPending} className="font-semibold">
                               {updateMutation.isPending ? "Saving…" : "Save changes"}
                             </Button>
                           </DialogFooter>
