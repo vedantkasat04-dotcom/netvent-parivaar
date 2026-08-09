@@ -14,7 +14,7 @@ function badRequest(res: import("express").Response, message: string) {
 async function resolveExpertiseIds(ids: unknown): Promise<string[] | null> {
   if (!Array.isArray(ids)) return null;
   const unique = [...new Set(ids.map(String))];
-  if (unique.length === 0 || unique.length > 3) return null;
+  if (unique.length === 0 || unique.length > 6) return null;
   const rows = await db.select({ id: expertiseTable.id }).from(expertiseTable).where(inArray(expertiseTable.id, unique));
   if (rows.length !== unique.length) return null;
   return unique;
@@ -86,7 +86,7 @@ router.patch("/v1/users/me", requireAuth, async (req: AuthRequest, res) => {
   let resolvedExpertise: string[] | null = null;
   if (body.expertiseIds !== undefined) {
     resolvedExpertise = await resolveExpertiseIds(body.expertiseIds);
-    if (!resolvedExpertise) { badRequest(res, "Select 1 to 3 valid expertise options"); return; }
+    if (!resolvedExpertise) { badRequest(res, "Select 1 to 6 valid expertise options"); return; }
   }
 
   if (Object.keys(updates).length > 0) {

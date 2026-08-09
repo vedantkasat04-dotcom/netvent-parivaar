@@ -17,7 +17,7 @@ function badRequest(res: import("express").Response, message: string) {
 async function resolveExpertiseIds(ids: unknown): Promise<string[] | null> {
   if (!Array.isArray(ids) || ids.length === 0) return null;
   const unique = [...new Set(ids.map(String))];
-  if (unique.length > 3) return null;
+  if (unique.length > 6) return null;
   const rows = await db.select({ id: expertiseTable.id }).from(expertiseTable).where(inArray(expertiseTable.id, unique));
   if (rows.length !== unique.length) return null;
   return unique;
@@ -60,7 +60,7 @@ router.post("/v1/auth/signup", async (req, res) => {
   }
   const resolvedExpertise = await resolveExpertiseIds(expertiseIds);
   if (!resolvedExpertise) {
-    badRequest(res, "Select 1 to 3 valid expertise options");
+    badRequest(res, "Select 1 to 6 valid expertise options");
     return;
   }
 
