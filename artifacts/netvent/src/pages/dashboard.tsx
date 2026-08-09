@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,10 +22,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CityCombobox } from "@/components/CityCombobox";
 import { ExpertiseMultiSelect } from "@/components/ExpertiseMultiSelect";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, GraduationCap, Pencil, Mail, Phone, Camera } from "lucide-react";
+import { MapPin, GraduationCap, Pencil, Mail, Phone, Camera, Upload, Loader2 } from "lucide-react";
 
 const TEAL = "#3FA796";
 const NAVY = "#0E1B2A";
+
+// Cloudinary config
+const CLOUDINARY_CLOUD_NAME = "ps0z2wgb";
+const CLOUDINARY_UPLOAD_PRESET = "netvent_avatars";
+const MAX_FILE_SIZE_MB = 2;
 
 const SCHOOL_CLASSES = ["8th", "9th", "10th", "11th", "12th"];
 const COLLEGE_YEARS = ["1st", "2nd", "3rd", "4th", "5th"];
@@ -49,11 +54,38 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
+// Cloudinary upload helper — returns secure_url on success
+async function uploadToCloudinary(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: "POST", body: formData }
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => "");
+    throw new Error(`Upload failed: ${res.status} ${errorText}`);
+  }
+
+  const data = await res.json();
+  if (!data.secure_url) throw new Error("Upload succeeded but no URL returned");
+  return data.secure_url as string;
+}
+
 export default function Dashboard() {
   const { user, refreshUser } = useAuth();
   const { toast } = useToast();
   const [editOpen, setEditOpen] = useState(false);
   const [available, setAvailable] = useState(user?.isAvailable ?? true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingDialogAvatar, setUploadingDialogAvatar] = useState(false);
+
+  // Hidden file input refs
+  const avatarFileInputRef = useRef<HTMLInputElement>(null);
+  const dialogFileInputRef = useRef<HTMLInputElement>(null);
 
   const updateMutation = useUpdateMe();
   const availabilityMutation = useSetAvailability();
@@ -83,6 +115,97 @@ export default function Dashboard() {
 
   const educationType = form.watch("educationType");
   const avatarUrlWatch = form.watch("avatarUrl");
+
+  // Validate file before upload
+  const validateFile = (file: File): string | null => {
+    if (!file.type.startsWith("image/")) return "Please select an image file (JPG, PNG, WebP).";
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) return `File too large. Max ${MAX_FILE_SIZE_MB}MB allowed.`;
+    return null;
+  };
+
+  // Direct upload from camera icon on profile — uploads AND saves to backend
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      toast({ title: "Invalid file", description: validationError, variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const secureUrl = await uploadToCloudinary(file);
+
+      // Save to backend — only update avatarUrl, keep everything else as-is
+      if (!user) throw new Error("Not logged in");
+      const isSchool = user.educationType === "SCHOOL";
+      await new Promise<void>((resolve, reject) => {
+        updateMutation.mutate({
+          data: {
+            name: user.name,
+            email: user.email,
+            phone: user.phone ?? "",
+            city: user.city ?? "",
+            educationType: user.educationType as UpdateProfileInputEducationType,
+            schoolOrCollegeName: user.schoolOrCollegeName ?? "",
+            schoolClass: isSchool ? user.schoolClass ?? null : null,
+            degreeLevel: isSchool ? null : (user.degreeLevel as UpdateProfileInputDegreeLevel) ?? null,
+            collegeYear: isSchool ? null : user.collegeYear ?? null,
+            bio: user.bio ?? null,
+            avatarUrl: secureUrl,
+            expertiseIds: user.expertise?.map(ex => ex.id) ?? [],
+          },
+        }, {
+          onSuccess: () => resolve(),
+          onError: (err) => reject(err),
+        });
+      });
+
+      await refreshUser();
+      toast({ title: "Photo updated", description: "Your new profile photo is live." });
+    } catch (err: any) {
+      toast({
+        title: "Upload failed",
+        description: err?.message || "Could not upload photo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
+
+  // Upload from within edit dialog — only updates form field, saves on dialog submit
+  const handleDialogAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validationError = validateFile(file);
+    if (validationError) {
+      toast({ title: "Invalid file", description: validationError, variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingDialogAvatar(true);
+    try {
+      const secureUrl = await uploadToCloudinary(file);
+      form.setValue("avatarUrl", secureUrl, { shouldValidate: true, shouldDirty: true });
+      toast({ title: "Photo uploaded", description: "Click 'Save changes' to apply." });
+    } catch (err: any) {
+      toast({
+        title: "Upload failed",
+        description: err?.message || "Could not upload photo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingDialogAvatar(false);
+      e.target.value = "";
+    }
+  };
 
   const onSubmit = (data: ProfileFormValues) => {
     const isSchool = data.educationType === UpdateProfileInputEducationType.SCHOOL;
@@ -143,6 +266,15 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-10 max-w-5xl">
         <h1 className="font-heading text-3xl font-bold mb-8" style={{ color: NAVY }}>My Parivaar</h1>
 
+        {/* Hidden file input for direct camera-icon upload */}
+        <input
+          ref={avatarFileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleAvatarFileChange}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile card */}
           <div className="lg:col-span-2">
@@ -159,15 +291,26 @@ export default function Dashboard() {
                           {user.name.charAt(0)}
                         </div>
                       )}
+                      {/* Loading overlay during upload */}
+                      {uploadingAvatar && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                          <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        </div>
+                      )}
                     </div>
-                    {/* Camera icon — opens edit dialog */}
+                    {/* Camera icon — opens file picker directly */}
                     <button
-                      onClick={() => setEditOpen(true)}
-                      className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110"
+                      onClick={() => !uploadingAvatar && avatarFileInputRef.current?.click()}
+                      disabled={uploadingAvatar}
+                      className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{ background: TEAL, border: "2px solid white" }}
-                      title="Change photo"
+                      title={uploadingAvatar ? "Uploading…" : "Change photo"}
                     >
-                      <Camera className="w-4 h-4 text-white" />
+                      {uploadingAvatar ? (
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      ) : (
+                        <Camera className="w-4 h-4 text-white" />
+                      )}
                     </button>
                   </div>
 
@@ -182,6 +325,16 @@ export default function Dashboard() {
                         <DialogTitle>Edit Profile</DialogTitle>
                         <DialogDescription>Update your details. Changes appear in the directory.</DialogDescription>
                       </DialogHeader>
+
+                      {/* Hidden file input for dialog upload */}
+                      <input
+                        ref={dialogFileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleDialogAvatarFileChange}
+                      />
+
                       <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                           <FormField control={form.control} name="name" render={({ field }) => (
@@ -206,29 +359,56 @@ export default function Dashboard() {
                             <FormItem><FormLabel>City</FormLabel><FormControl><CityCombobox value={field.value} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
                           )} />
 
-                          {/* Photo URL field with preview */}
-                          <FormField control={form.control} name="avatarUrl" render={({ field }) => (
+                          {/* Photo upload field — click to upload, no URL paste */}
+                          <FormField control={form.control} name="avatarUrl" render={() => (
                             <FormItem>
                               <FormLabel>Profile Photo <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
                               <div className="flex items-center gap-3">
                                 {/* Preview */}
-                                <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-border"
+                                <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border border-border relative"
                                   style={{ background: "rgba(63,167,150,0.1)" }}>
                                   {avatarUrlWatch ? (
                                     <img src={avatarUrlWatch} alt="Preview" className="w-full h-full object-cover"
                                       onError={(e) => (e.currentTarget.style.display = "none")} />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                      <Camera className="w-5 h-5" style={{ color: TEAL, opacity: 0.5 }} />
+                                      <Camera className="w-6 h-6" style={{ color: TEAL, opacity: 0.5 }} />
+                                    </div>
+                                  )}
+                                  {uploadingDialogAvatar && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                                      <Loader2 className="w-5 h-5 text-white animate-spin" />
                                     </div>
                                   )}
                                 </div>
-                                <FormControl>
-                                  <Input placeholder="Paste image URL (e.g. from Google Photos, ImgBB…)" {...field} value={field.value ?? ""} className="h-11 flex-1" />
-                                </FormControl>
+                                <div className="flex-1 flex flex-col gap-2">
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={uploadingDialogAvatar}
+                                    onClick={() => dialogFileInputRef.current?.click()}
+                                    className="gap-2 w-full"
+                                    style={{ borderColor: TEAL, color: TEAL }}
+                                  >
+                                    {uploadingDialogAvatar ? (
+                                      <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
+                                    ) : (
+                                      <><Upload className="w-4 h-4" /> {avatarUrlWatch ? "Change Photo" : "Upload Photo"}</>
+                                    )}
+                                  </Button>
+                                  {avatarUrlWatch && !uploadingDialogAvatar && (
+                                    <button
+                                      type="button"
+                                      onClick={() => form.setValue("avatarUrl", "", { shouldDirty: true })}
+                                      className="text-xs text-muted-foreground hover:text-destructive text-left"
+                                    >
+                                      Remove photo
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                               <p className="text-xs text-muted-foreground mt-1">
-                                Upload your photo to <a href="https://imgbb.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: TEAL }}>imgbb.com</a> (free) → copy link → paste here.
+                                JPG, PNG, or WebP · Max {MAX_FILE_SIZE_MB}MB
                               </p>
                               <FormMessage />
                             </FormItem>
@@ -306,7 +486,7 @@ export default function Dashboard() {
                           )} />
 
                           <DialogFooter>
-                            <Button type="submit" disabled={updateMutation.isPending} className="font-semibold">
+                            <Button type="submit" disabled={updateMutation.isPending || uploadingDialogAvatar} className="font-semibold">
                               {updateMutation.isPending ? "Saving…" : "Save changes"}
                             </Button>
                           </DialogFooter>
