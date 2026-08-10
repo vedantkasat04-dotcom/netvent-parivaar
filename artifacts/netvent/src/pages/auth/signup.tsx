@@ -14,11 +14,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { CityCombobox } from "@/components/CityCombobox";
 import { ExpertiseMultiSelect } from "@/components/ExpertiseMultiSelect";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
+
+const TEAL = "#3FA796";
+const NAVY = "#0E1B2A";
 
 const SCHOOL_CLASSES = ["8th", "9th", "10th", "11th", "12th"];
 const COLLEGE_YEARS = ["1st", "2nd", "3rd", "4th", "5th"];
@@ -36,7 +43,10 @@ const signupSchema = z.object({
   schoolClass: z.string().optional(),
   degreeLevel: z.string().optional(),
   collegeYear: z.string().optional(),
-  expertiseIds: z.array(z.string()).max(6, { message: "Select up to 6 skills." }).optional().default([]),
+  expertiseIds: z.array(z.string()).max(3, { message: "Select up to 3 skills." }),
+  agreedToTerms: z.boolean().refine((v) => v === true, {
+    message: "You must agree to the Terms & Conditions to join.",
+  }),
 }).superRefine((data, ctx) => {
   if (!data.schoolOrCollegeName || data.schoolOrCollegeName.trim().length < 2) {
     ctx.addIssue({ code: "custom", path: ["schoolOrCollegeName"], message: "Please enter your institution name." });
@@ -56,6 +66,7 @@ export default function Signup() {
   const { refreshUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) setLocation("/dashboard");
@@ -71,10 +82,12 @@ export default function Signup() {
       educationType: undefined as unknown as SignupFormValues["educationType"],
       schoolOrCollegeName: "", schoolClass: "", degreeLevel: "", collegeYear: "",
       expertiseIds: [],
+      agreedToTerms: false,
     },
   });
 
   const educationType = form.watch("educationType");
+  const agreedToTerms = form.watch("agreedToTerms");
 
   const onSubmit = (data: SignupFormValues) => {
     const isSchool = data.educationType === SignupInputEducationType.SCHOOL;
@@ -90,7 +103,7 @@ export default function Signup() {
         schoolClass: isSchool ? data.schoolClass || null : null,
         degreeLevel: isSchool ? null : (data.degreeLevel as SignupInputDegreeLevel) || null,
         collegeYear: isSchool ? null : data.collegeYear || null,
-        expertiseIds: data.expertiseIds ?? [],
+        expertiseIds: data.expertiseIds,
       },
     }, {
       onSuccess: async () => {
@@ -110,6 +123,107 @@ export default function Signup() {
 
   return (
     <AppLayout>
+      {/* Terms & Conditions Modal */}
+      <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading text-2xl" style={{ color: NAVY }}>
+              Your Privacy on NetVent Parivaar
+            </DialogTitle>
+            <DialogDescription>
+              How your information is used within our community.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4 text-sm" style={{ color: "#4A5568" }}>
+            {/* Visible to others */}
+            <section>
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Visible to other logged-in members
+              </h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Your name</li>
+                <li>Your profile photo</li>
+                <li>Your city</li>
+                <li>Your school/college and education details</li>
+                <li>Your skills and expertise</li>
+                <li>Your bio (if added)</li>
+              </ul>
+            </section>
+
+            {/* Gated behind login */}
+            <section>
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Visible to logged-in members only (gated behind login)
+              </h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Your email address</li>
+                <li>Your phone number</li>
+              </ul>
+              <p className="text-xs mt-2 italic" style={{ color: "rgba(74,85,104,0.75)" }}>
+                Visitors who are not logged in cannot see these details.
+              </p>
+            </section>
+
+            {/* Not visible */}
+            <section>
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Not visible to anyone
+              </h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Your password (encrypted, only you know it)</li>
+              </ul>
+            </section>
+
+            {/* Your control */}
+            <section>
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Your control
+              </h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>
+                  Toggle <strong>"Availability"</strong> off from your dashboard — your profile will appear in grayscale to others
+                </li>
+                <li>Edit or remove any information anytime from your dashboard</li>
+              </ul>
+            </section>
+
+            {/* Community guidelines */}
+            <section>
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Community guidelines
+              </h3>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Use real information — this is a genuine community</li>
+                <li>Don't spam, harass, or misuse contact details of other members</li>
+                <li>Respect fellow Parivaar members</li>
+                <li>Content you post may be reviewed by moderators</li>
+              </ul>
+            </section>
+
+            {/* Consent */}
+            <section
+              className="rounded-xl p-4"
+              style={{ background: "rgba(63,167,150,0.08)", border: "1px solid rgba(63,167,150,0.2)" }}
+            >
+              <h3 className="font-semibold text-base mb-2" style={{ color: NAVY }}>
+                Your consent
+              </h3>
+              <p>
+                By checking the box on the signup form, you agree to join NetVent Parivaar
+                and understand how your information will be used.
+              </p>
+            </section>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <Button onClick={() => setTermsOpen(false)} style={{ background: TEAL }} className="text-white">
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="container mx-auto px-4 py-16 flex justify-center items-start min-h-[calc(100vh-16rem)]">
         <Card className="w-full max-w-xl border-border/50 shadow-lg">
           <CardHeader className="space-y-2 text-center pb-6">
@@ -262,21 +376,57 @@ export default function Signup() {
                   )}
                 </div>
 
-                {/* Skills — optional */}
+                {/* Skills */}
                 <div className="space-y-5 pt-2">
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Skills &amp; Expertise <span className="normal-case font-normal text-muted-foreground">(optional)</span></h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Skills &amp; Expertise</h3>
                   <FormField control={form.control} name="expertiseIds" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-medium">Your top skills <span className="text-muted-foreground font-normal">(up to 6)</span></FormLabel>
+                      <FormLabel className="font-medium">Your top skills <span className="text-muted-foreground font-normal">(up to 3)</span></FormLabel>
                       <FormControl>
-                        <ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value ?? []} onChange={field.onChange} max={6} />
+                        <ExpertiseMultiSelect options={expertiseData?.data ?? []} value={field.value} onChange={field.onChange} max={3} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                 </div>
 
-                <Button type="submit" className="w-full h-12 text-base font-semibold mt-2" disabled={signupMutation.isPending}>
+                {/* Terms & Conditions */}
+                <div className="pt-2">
+                  <FormField control={form.control} name="agreedToTerms" render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-start gap-3 rounded-xl border p-4"
+                        style={{ background: "rgba(63,167,150,0.04)", borderColor: "rgba(63,167,150,0.2)" }}>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="mt-0.5"
+                            id="terms-checkbox"
+                          />
+                        </FormControl>
+                        <label htmlFor="terms-checkbox" className="text-sm leading-relaxed cursor-pointer select-none" style={{ color: NAVY }}>
+                          I agree to the{" "}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); setTermsOpen(true); }}
+                            className="font-semibold underline hover:opacity-80"
+                            style={{ color: "#2563EB" }}
+                          >
+                            Terms &amp; Conditions
+                          </button>
+                          {" "}and understand how my information will be used and visible within the NetVent Parivaar community.
+                        </label>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold mt-2"
+                  disabled={signupMutation.isPending || !agreedToTerms}
+                >
                   {signupMutation.isPending ? "Creating account..." : "Create account"}
                 </Button>
               </form>
