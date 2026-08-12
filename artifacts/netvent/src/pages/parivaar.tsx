@@ -144,7 +144,7 @@ export default function Parivaar() {
                       {/* Skills — always visible */}
                       {member.expertise && member.expertise.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-4">
-                          {member.expertise.slice(0, 3).map(skill => (
+                          {member.expertise.map(skill => (
                             <span key={skill.id} className="text-xs font-medium px-2.5 py-1 rounded-full"
                               style={{ background: "rgba(63,167,150,0.1)", color: TEAL }}>
                               {skill.name}
