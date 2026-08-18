@@ -98,7 +98,7 @@ router.post("/v1/auth/login", async (req, res) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) { res.status(401).json({ success: false, error: { code: "INVALID_CREDENTIALS", message: "Invalid email or password" } }); return; }
 
-  (req.session as any).userId = user.id;
+  // JWT set above
 
   const expertiseRows = await db.select({ id: expertiseTable.id, name: expertiseTable.name })
     .from(userExpertiseTable)
