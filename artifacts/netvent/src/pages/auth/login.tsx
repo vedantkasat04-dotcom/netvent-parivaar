@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
+const TEAL = "#3FA796";
+
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
@@ -82,7 +84,12 @@ export default function Login() {
 
                 <FormField control={form.control} name="password" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-medium text-foreground">Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="font-medium text-foreground">Password</FormLabel>
+                      <Link href="/forgot-password" className="text-xs font-medium hover:underline" style={{ color: TEAL }}>
+                        Forgot password?
+                      </Link>
+                    </div>
                     <FormControl>
                       <div className="relative">
                         <Input type={showPassword ? "text" : "password"} placeholder="••••••••" autoComplete="current-password" {...field} className="h-12 pr-10" />
