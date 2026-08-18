@@ -15,6 +15,8 @@ import Gallery from "@/pages/gallery";
 import MemberProfile from "@/pages/member-profile";
 import Login from "@/pages/auth/login";
 import Signup from "@/pages/auth/signup";
+import ForgotPassword from "@/pages/auth/forgot-password";
+import ResetPassword from "@/pages/auth/reset-password";
 
 import Dashboard from "@/pages/dashboard";
 import Groups from "@/pages/groups";
@@ -59,6 +61,8 @@ function Router() {
       
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/join">{() => <Redirect to="/dashboard" />}</Route>
       
       <ProtectedRoute path="/dashboard" component={Dashboard} />
