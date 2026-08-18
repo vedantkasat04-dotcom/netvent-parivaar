@@ -10,6 +10,11 @@ import crypto from "crypto";
 import { Resend } from "resend";
 
 const router = Router();
+
+function badRequest(res: any, message: string) {
+  res.status(400).json({ success: false, error: { code: "VALIDATION", message } });
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ─── Password Reset Tokens table (inline schema) ─────────────────────────────
