@@ -4,7 +4,7 @@ import { db } from "@workspace/db";
 import { usersTable, expertiseTable, userExpertiseTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 import { requireAuth, type AuthRequest } from "../middlewares/auth";
-import { badRequest } from "../lib/errors";
+
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import crypto from "crypto";
 import { Resend } from "resend";
@@ -119,7 +119,7 @@ router.get("/v1/auth/me", requireAuth, async (req: AuthRequest, res) => {
 // ─── Forgot Password ──────────────────────────────────────────────────────────
 router.post("/v1/auth/forgot-password", async (req, res) => {
   const { email } = req.body;
-  if (!email) { badRequest(res, "Email is required"); return; }
+  if (!email) { res.status(400).json({ success: false, error: { code: "VALIDATION", message: "Email is required" } }); return; }
 
   // Always return success — don't reveal if email exists
   const [user] = await db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
@@ -168,8 +168,8 @@ router.post("/v1/auth/forgot-password", async (req, res) => {
 // ─── Reset Password ───────────────────────────────────────────────────────────
 router.post("/v1/auth/reset-password", async (req, res) => {
   const { token, password } = req.body;
-  if (!token || !password) { badRequest(res, "Token and password are required"); return; }
-  if (password.length < 8) { badRequest(res, "Password must be at least 8 characters"); return; }
+  if (!token || !password) { res.status(400).json({ success: false, error: { code: "VALIDATION", message: "Token and password are required" } }); return; }
+  if (password.length < 8) { res.status(400).json({ success: false, error: { code: "VALIDATION", message: "Password must be at least 8 characters" } }); return; }
 
   const [resetToken] = await db.select().from(passwordResetTokensTable).where(eq(passwordResetTokensTable.token, token)).limit(1);
 
