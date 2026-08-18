@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
 import { usersTable, expertiseTable, userExpertiseTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
-import { requireAuth, type AuthRequest } from "../middlewares/auth";
+import { requireAuth, signToken, type AuthRequest } from "../middlewares/auth";
 
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import crypto from "crypto";
@@ -83,7 +83,8 @@ router.post("/v1/auth/signup", async (req, res) => {
     await db.insert(userExpertiseTable).values(resolvedExpertise.map(id => ({ userId: user.id, expertiseId: id })));
   }
 
-  (req.session as any).userId = user.id;
+  const token = signToken({ userId: user.id, role: user.role });
+  res.cookie("nvp_session", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", maxAge: 7 * 24 * 60 * 60 * 1000 });
   res.status(201).json({ success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
 
@@ -108,7 +109,7 @@ router.post("/v1/auth/login", async (req, res) => {
 });
 
 router.post("/v1/auth/logout", (req, res) => {
-  req.session.destroy(() => {});
+  res.clearCookie("nvp_session");
   res.json({ success: true });
 });
 
