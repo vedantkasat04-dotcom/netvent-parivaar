@@ -3,5 +3,13 @@
     { "source": "/api/:path*", "destination": "https://netvent-parivaar.onrender.com/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" }
+      ]
+    }
+  ],
   "outputDirectory": "dist/public"
 }

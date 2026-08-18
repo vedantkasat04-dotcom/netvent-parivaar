@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await logoutMutation.mutateAsync();
     } finally {
+      localStorage.removeItem("nvp_token");
       queryClient.setQueryData(getGetMeQueryKey(), null);
       await queryClient.invalidateQueries();
     }

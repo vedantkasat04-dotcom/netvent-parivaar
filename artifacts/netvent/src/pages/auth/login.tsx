@@ -43,7 +43,8 @@ export default function Login() {
 
   const onSubmit = (data: LoginFormValues) => {
     loginMutation.mutate({ data }, {
-      onSuccess: async () => {
+      onSuccess: async (data) => {
+        if ((data as any).token) localStorage.setItem("nvp_token", (data as any).token);
         await refreshUser();
         toast({ title: "Welcome back!", description: "You have successfully logged in." });
         setLocation("/dashboard");

@@ -105,7 +105,7 @@ router.post("/v1/auth/login", async (req, res) => {
     .innerJoin(expertiseTable, eq(userExpertiseTable.expertiseId, expertiseTable.id))
     .where(eq(userExpertiseTable.userId, user.id));
 
-  res.json({ success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone, city: user.city, educationType: user.educationType, schoolOrCollegeName: user.schoolOrCollegeName, schoolClass: user.schoolClass, degreeLevel: user.degreeLevel, collegeYear: user.collegeYear, bio: user.bio, avatarUrl: user.avatarUrl, isAvailable: user.isAvailable, expertise: expertiseRows } });
+  res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role, phone: user.phone, city: user.city, educationType: user.educationType, schoolOrCollegeName: user.schoolOrCollegeName, schoolClass: user.schoolClass, degreeLevel: user.degreeLevel, collegeYear: user.collegeYear, bio: user.bio, avatarUrl: user.avatarUrl, isAvailable: user.isAvailable, expertise: expertiseRows } });
 });
 
 router.post("/v1/auth/logout", (req, res) => {
