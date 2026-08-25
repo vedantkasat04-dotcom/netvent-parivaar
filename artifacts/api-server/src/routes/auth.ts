@@ -98,7 +98,8 @@ router.post("/v1/auth/login", async (req, res) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) { res.status(401).json({ success: false, error: { code: "INVALID_CREDENTIALS", message: "Invalid email or password" } }); return; }
 
-  // JWT set above
+  const token = signToken({ userId: user.id, role: user.role });
+  res.cookie("nvp_session", token, { httpOnly: true, secure: true, sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
   const expertiseRows = await db.select({ id: expertiseTable.id, name: expertiseTable.name })
     .from(userExpertiseTable)
