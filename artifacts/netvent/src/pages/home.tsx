@@ -282,7 +282,7 @@ function WhatIsNetVent() {
   );
 }
 
-function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; title: string; quote: string; photoSrc: string; delay: number }) {
+function FounderCard({ name, title, quote, photoSrc, delay, objectPosition = "50% 20%" }: { name: string; title: string; quote: string; photoSrc: string; delay: number; objectPosition?: string }) {
   const fade = useFadeUp(delay);
   const [imgErr, setImgErr] = useState(false);
 
@@ -292,7 +292,7 @@ function FounderCard({ name, title, quote, photoSrc, delay }: { name: string; ti
         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 32px rgba(0,0,0,0.25)" }}>
         <div className="w-full overflow-hidden flex-shrink-0" style={{ aspectRatio: "4/3", background: "linear-gradient(135deg, #1a3040, #3FA796)" }}>
           {!imgErr ? (
-            <img src={photoSrc} alt={name} className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            <img src={photoSrc} alt={name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition }}
               onError={() => setImgErr(true)} />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -340,7 +340,7 @@ function FoundersDesk() {
             name="Vedant Kasat"
             title="Co-Founder"
             quote="Every event has taught me one thing: people aren't just looking for certificates or networking. They're looking for genuine connections. That's what we're trying to build with NetVent."
-            photoSrc="/founders/vedant.jpg"
+            photoSrc="/founders/vedant.jpg" objectPosition="50% 30%" objectPosition="50% 20%"
             delay={150}
           />
         </div>
