@@ -340,7 +340,7 @@ function FoundersDesk() {
             name="Vedant Kasat"
             title="Co-Founder"
             quote="Every event has taught me one thing: people aren't just looking for certificates or networking. They're looking for genuine connections. That's what we're trying to build with NetVent."
-            photoSrc="/founders/vedant.jpg" objectPosition="50% 30%" objectPosition="50% 20%"
+            photoSrc="/founders/vedant.jpg" objectPosition="50% 40%" objectPosition="50% 20%"
             delay={150}
           />
         </div>
