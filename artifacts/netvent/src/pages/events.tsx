@@ -147,7 +147,7 @@ export default function Events() {
                         {isUpcoming ? (
                           /* Upcoming: simple description only */
                           <div className="text-sm text-muted-foreground leading-relaxed">
-                            {event.description || "Details coming soon. Stay tuned!"}
+                            {"Details coming soon. Stay tuned!"}
                           </div>
                         ) : (
                           /* Past: full metadata */
