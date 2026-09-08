@@ -197,6 +197,24 @@ export default function Events() {
                             )}
                           </div>
                         )}
+
+                        {/* Buttons */}
+                        <div className="mt-4 pt-4 border-t border-border/50 flex gap-2 flex-wrap">
+                          <Link href={`/events/${event.id}`}>
+                            <button className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
+                              style={{ borderColor: "#3FA796", color: "#3FA796", background: "transparent" }}>
+                              View Details
+                            </button>
+                          </Link>
+                          {event.id === "0c915525-59ed-437c-896d-d043d5535c63" && (
+                            <a href="https://forms.gle/TmSGLs4HdLvHTxKF9" target="_blank" rel="noopener noreferrer" style={{ flex: 1 }}>
+                              <button className="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-colors"
+                                style={{ background: "#3FA796" }}>
+                                Register Now
+                              </button>
+                            </a>
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   );
