@@ -147,7 +147,7 @@ export default function Events() {
                         {isUpcoming ? (
                           /* Upcoming: simple description only */
                           <div className="text-sm text-muted-foreground leading-relaxed">
-                            null
+
                           </div>
                         ) : (
                           /* Past: full metadata */
