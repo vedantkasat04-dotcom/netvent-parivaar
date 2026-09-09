@@ -145,7 +145,7 @@ export default function Events() {
                         </h3>
                         {isUpcoming && event.eventDate && (
                           <p className="text-sm font-medium mb-3" style={{ color: "#3FA796" }}>
-                            {new Date(event.eventDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                            {event.id === "0c915525-59ed-437c-896d-d043d5535c63" ? "31st October - 1st November 2026" : new Date(event.eventDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                           </p>
                         )}
 
