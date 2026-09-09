@@ -146,6 +146,7 @@ function NotifyPopup() {
 
         {/* Register Now button */}
         
+<a
           href="https://forms.gle/TmSGLs4HdLvHTxKF9"
           target="_blank"
           rel="noopener noreferrer"
