@@ -140,9 +140,14 @@ export default function Events() {
 
                       {/* Body */}
                       <CardContent className="p-6 flex-1 flex flex-col">
-                        <h3 className="font-heading font-bold text-xl mb-4 line-clamp-2">
+                        <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2">
                           {event.title}
                         </h3>
+                        {isUpcoming && event.eventDate && (
+                          <p className="text-sm font-medium mb-3" style={{ color: "#3FA796" }}>
+                            {new Date(event.eventDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                          </p>
+                        )}
 
                         {isUpcoming ? (
                           /* Upcoming: simple description only */
