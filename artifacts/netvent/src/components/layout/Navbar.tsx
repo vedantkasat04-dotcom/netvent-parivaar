@@ -104,6 +104,12 @@ export function Navbar() {
                 <Link href="/login" className="text-sm font-medium transition-colors" style={{ color: linkColor }}>
                   Log in
                 </Link>
+                <a href="https://forms.gle/TmSGLs4HdLvHTxKF9" target="_blank" rel="noopener noreferrer">
+                  <Button className="rounded-full px-5 font-semibold text-white transition-all hover:scale-105 hover:shadow-md"
+                    style={{ background: "#D4A017", border: "none", fontSize: "0.8rem" }}>
+                    🚀 Register Now
+                  </Button>
+                </a>
                 <Link href="/signup">
                   <Button className="rounded-full px-5 font-semibold text-white transition-all hover:scale-105 hover:shadow-md"
                     style={{ background: TEAL, border: "none" }}>

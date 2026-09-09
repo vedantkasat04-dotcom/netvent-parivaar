@@ -173,6 +173,12 @@ function HeroSection() {
               Explore Events
             </Button>
           </Link>
+          <a href="https://forms.gle/TmSGLs4HdLvHTxKF9" target="_blank" rel="noopener noreferrer">
+            <Button size="lg" className="w-full sm:w-auto rounded-full px-8 h-13 text-base font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
+              style={{ background: "#D4A017", border: "none", height: "52px" }}>
+              🚀 NetVentrepreneur — Register Now
+            </Button>
+          </a>
         </div>
       </div>
     </section>
