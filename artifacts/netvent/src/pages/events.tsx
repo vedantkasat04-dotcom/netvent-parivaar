@@ -125,14 +125,14 @@ export default function Events() {
                           </div>
                         )}
 
-                        {/* Date badge — "Coming Soon" for upcoming, date for past */}
+                        {/* Date badge — "Registrations Open" for upcoming, date for past */}
                         <div className="absolute top-4 left-4 backdrop-blur px-3 py-1 rounded-md text-sm font-semibold shadow-sm"
                           style={isUpcoming
                             ? { background: TEAL, color: "#fff" }
                             : { background: "rgba(255,255,255,0.95)", color: "#0E1B2A", border: "1px solid rgba(0,0,0,0.08)" }
                           }>
                           {isUpcoming
-                            ? "Coming Soon"
+                            ? "Registrations Open"
                             : (meta.dateRange || safeFormat(event.eventDate, "MMM d, yyyy") || "")
                           }
                         </div>
