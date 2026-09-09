@@ -86,137 +86,89 @@ function LoadingSplash() {
   );
 }
 
-// ---------- Notify popup (homepage only, once per user) ----------
+// ---------- Event popup (once per session) ----------
 function NotifyPopup() {
-  const [location] = useLocation();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    // Only on homepage
-    if (location !== "/") return;
-    // Only once ever
-    if (localStorage.getItem("nvp_popup_seen")) return;
-
-    const t = setTimeout(() => setOpen(true), 6000);
+    if (sessionStorage.getItem("nvp_event_popup_seen")) return;
+    const t = setTimeout(() => setOpen(true), 1500);
     return () => clearTimeout(t);
-  }, [location]);
+  }, []);
 
   const close = () => {
+    sessionStorage.setItem("nvp_event_popup_seen", "1");
     setOpen(false);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("nvp_popup_seen", "1");
-    }
   };
 
   if (!open) return null;
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9998,
-        background: "rgba(14,27,42,0.55)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "16px",
-        animation: "nvp-popup-fade 0.35s ease-out",
-      }}
       onClick={close}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(0,0,0,0.75)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "20px",
+      }}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
         style={{
-          background: "#fff",
-          borderRadius: "20px",
-          width: "100%",
-          maxWidth: "540px",
-          maxHeight: "92vh",
-          overflow: "hidden",
-          boxShadow: "0 24px 80px rgba(14,27,42,0.4)",
           position: "relative",
-          animation: "nvp-popup-slide 0.4s ease-out",
-          display: "flex",
-          flexDirection: "column",
+          maxWidth: 480,
+          width: "100%",
+          borderRadius: 20,
+          overflow: "hidden",
+          boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Close */}
+        {/* Close button */}
         <button
           onClick={close}
-          aria-label="Close"
           style={{
-            position: "absolute",
-            top: 12,
-            right: 12,
-            zIndex: 2,
-            width: 34,
-            height: 34,
-            borderRadius: "9999px",
-            background: "rgba(14,27,42,0.06)",
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            color: "#0E1B2A",
+            position: "absolute", top: 12, right: 12, zIndex: 10,
+            background: "rgba(0,0,0,0.5)", border: "none", borderRadius: "50%",
+            width: 32, height: 32, cursor: "pointer",
+            color: "white", fontSize: 18, lineHeight: "32px", textAlign: "center",
           }}
         >
-          <X className="w-4 h-4" />
+          ×
         </button>
 
-        {/* Header */}
-        <div style={{ padding: "24px 24px 8px 24px", textAlign: "center" }}>
-          <h3
-            style={{
-              fontSize: "clamp(1.3rem, 3vw, 1.6rem)",
-              fontWeight: 700,
-              color: "#0E1B2A",
-              marginBottom: "6px",
-              fontFamily: "inherit",
-            }}
-          >
-            Don't miss the next one.
-          </h3>
-          <p style={{ fontSize: "0.9rem", color: "#4A5568", margin: 0 }}>
-            Drop your details. We'll message you the moment registrations open.
-          </p>
-        </div>
+        {/* Poster image */}
+        <img
+          src="/events/netventrepreneur-popup.jpg"
+          alt="NetVentrepreneur Vadodara"
+          style={{ width: "100%", display: "block" }}
+        />
 
-        {/* Iframe */}
-        <div style={{ flex: 1, padding: "0 8px 8px 8px", minHeight: 0 }}>
-          <iframe
-            src={GOOGLE_FORM_URL}
-            title="Get Notified"
-            style={{
-              width: "100%",
-              height: "min(560px, 65vh)",
-              border: "none",
-              borderRadius: "12px",
-            }}
-          >
-            Loading...
-          </iframe>
-        </div>
+        {/* Register Now button */}
+        
+          href="https://forms.gle/TmSGLs4HdLvHTxKF9"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={close}
+          style={{
+            display: "block",
+            background: "#3FA796",
+            color: "white",
+            textAlign: "center",
+            padding: "16px",
+            fontWeight: 700,
+            fontSize: 18,
+            textDecoration: "none",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Register Now →
+        </a>
       </div>
-
-      <style>{`
-        @keyframes nvp-popup-fade {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes nvp-popup-slide {
-          from { transform: translateY(20px) scale(0.97); opacity: 0; }
-          to   { transform: translateY(0) scale(1); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }
+
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
