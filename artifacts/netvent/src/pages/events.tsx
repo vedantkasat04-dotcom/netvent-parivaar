@@ -138,9 +138,9 @@ export default function Events() {
                         <h3 className="font-heading font-bold text-xl mb-2 line-clamp-2">
                           {event.title}
                         </h3>
-                        {isUpcoming && event.eventDate && (
+                        {isUpcoming && event.eventDate && event.id === "0c915525-59ed-437c-896d-d043d5535c63" && (
                           <p className="text-sm font-medium mb-3" style={{ color: "#3FA796" }}>
-                            {event.id === "0c915525-59ed-437c-896d-d043d5535c63" ? "31st October - 1st November 2026" : new Date(event.eventDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                            31st October - 1st November 2026
                           </p>
                         )}
 
