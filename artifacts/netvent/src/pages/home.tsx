@@ -216,7 +216,7 @@ function StatsBanner() {
           <p className="text-base" style={{ color: "rgba(255,255,255,0.5)" }}>Real numbers. Real connections. Real Parivaar.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-          <StatItem icon={<Users className="w-7 h-7" />} value={600} suffix="+" label="Youth Connected" delay={0} />
+          <StatItem icon={<Users className="w-7 h-7" />} value={1000} suffix="+" label="Youth Connected" delay={0} />
           <StatItem icon={<MapPin className="w-7 h-7" />} value={3} suffix="" label="Cities Covered" delay={100} />
           <StatItem icon={<Heart className="w-7 h-7" />} value={75} suffix="+" label="Parivaar Members" delay={200} />
           <StatItem icon={<Calendar className="w-7 h-7" />} value={4} suffix="" label="Events Organised" delay={300} />
